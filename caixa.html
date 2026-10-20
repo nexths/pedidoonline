@@ -1,4 +1,4 @@
-a<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@ a<!DOCTYPE html>
     <header class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
         <div>
             <h1 class="text-2xl font-black text-emerald-400 tracking-wide">💵 PDV & Caixa - Fechamento de Mesas</h1>
-            <p class="text-xs text-gray-400 mt-0.5">Acompanhamento financeiro e consumo por mesa em tempo real</p>
+            <p class="text-xs text-gray-400 mt-0.5">Acompanhamento financeiro e consumo acumulado por mesa</p>
         </div>
         <div class="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-full">
             <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse" id="dotStatus"></span>
@@ -20,23 +20,20 @@ a<!DOCTYPE html>
         </div>
     </header>
 
-    <!-- Grid de Mesas / Comandas Abertas -->
-    <div id="listaCaixa" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Os cards de consumo por mesa entram aqui -->
-    </div>
+    <!-- Grid de Mesas Abertas -->
+    <div id="listaCaixa" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
 
-    <!-- Script de Controle do Caixa -->
     <script>
         const supabaseUrl = 'https://lcwmwyreawzjrggnbpcz.supabase.co';
         const supabaseKey = 'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4';
         const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         async function carregarMesasAbertas() {
-            // Busca todos os pedidos que ainda estão pendentes (ou não concluídos/pagos)
+            // Busca apenas os pedidos que ainda estão com pagamento em aberto
             const { data, error } = await sb
                 .from('pedidos')
                 .select('*')
-                .eq('status', 'pendente')
+                .eq('status_pagamento', 'aberto')
                 .order('created_at', { ascending: true });
 
             if (!error && data) {
@@ -56,7 +53,6 @@ a<!DOCTYPE html>
                 return;
             }
 
-            // Agrupa os pedidos por Mesa para somar tudo o que a mesa consumiu
             const mesasMap = {};
             pedidos.forEach(pedido => {
                 const mesa = pedido.mesa || 'Mesa 01';
@@ -73,7 +69,6 @@ a<!DOCTYPE html>
                 mesasMap[mesa].clientes.add(pedido.cliente);
                 mesasMap[mesa].totalGeral += Number(pedido.total);
                 
-                // Junta os itens de todos os pedidos daquela mesa
                 if (pedido.itens && Array.isArray(pedido.itens)) {
                     pedido.itens.forEach(item => {
                         mesasMap[mesa].itensGerais.push(item);
@@ -81,7 +76,6 @@ a<!DOCTYPE html>
                 }
             });
 
-            // Cria um card visual para cada mesa ativa
             Object.values(mesasMap).forEach(dadosMesa => {
                 let itensHtml = dadosMesa.itensGerais.map(i => `
                     <li class="flex justify-between text-sm py-1 border-b border-gray-800/60 last:border-0">
@@ -120,18 +114,17 @@ a<!DOCTYPE html>
         async function fecharConta(pedidosIds) {
             if (!confirm('Deseja realmente confirmar o pagamento e fechar a conta desta mesa?')) return;
 
-            // Atualiza o status de todos os pedidos daquela mesa para 'concluido' / 'pago'
+            // Altera o status de pagamento para 'pago' (sai do caixa e encerra a comanda)
             for (let id of pedidosIds) {
                 await sb
                     .from('pedidos')
-                    .update({ status: 'concluido' })
+                    .update({ status_pagamento: 'pago' })
                     .eq('id', id);
             }
 
             carregarMesasAbertas();
         }
 
-        // Tempo Real (WebSockets) via Supabase para atualizar o caixa na hora
         sb.channel('public:pedidos-caixa')
           .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, () => {
               carregarMesasAbertas();

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KDS - Painel da Cozinha</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen p-6">
+    <!-- Header da Cozinha -->
+    <header class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-red-500 tracking-wide">🔥 KDS - Painel da Cozinha</h1>
+            <p class="text-xs text-gray-400 mt-0.5">Gerenciamento de pedidos em tempo real</p>
+        </div>
+        <div class="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-full">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse" id="dotStatus"></span>
+            <span id="statusConexao" class="text-xs font-semibold text-yellow-400">Conectando...</span>
+        </div>
+    </header>
+
+    <!-- Grid de Pedidos Pendentes -->
+    <div id="listaPedidos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Os cards dos pedidos entram aqui dinamicamente -->
+    </div>
+
+    <!-- Script de Conexão e KDS -->
+    <script>
+        const supabaseUrl = 'https://lcwmwyreawzjrggnbpcz.supabase.co';
+        const supabaseKey = 'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4';
+        const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function carregarPedidosPendentes() {
+            const { data, error } = await sb
+                .from('pedidos')
+                .select('*')
+                .eq('status', 'pendente')
+                .order('created_at', { ascending: true });
+
+            if (!error && data) {
+                renderizarPedidos(data);
+            }
+        }
+
+        function renderizarPedidos(pedidos) {
+            const container = document.getElementById('listaPedidos');
+            container.innerHTML = '';
+
+            if (pedidos.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20">
+                        <p class="text-gray-500 text-base font-medium">Nenhum pedido pendente na cozinha no momento. Tudo tranquilo! 👨‍🍳</p>
+                    </div>`;
+                return;
+            }
+
+            pedidos.forEach(pedido => {
+                let itensHtml = pedido.itens.map(i => `
+                    <li class="flex justify-between text-sm py-1 border-b border-gray-800/60 last:border-0">
+                        <span class="font-medium text-gray-200">• ${i.nome}</span>
+                        <span class="text-gray-400 text-xs">R$ ${i.preco.toFixed(2).replace('.', ',')}</span>
+                    </li>
+                `).join('');
+                
+                let card = document.createElement('div');
+                card.className = 'bg-gray-900 border border-red-500/40 rounded-2xl p-5 shadow-xl flex flex-col justify-between hover:border-red-500 transition';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="bg-red-600 text-white px-3 py-1 rounded-lg font-black text-xs tracking-wider shadow-sm">${pedido.mesa}</span>
+                            <span class="text-xs text-gray-400 font-mono bg-gray-800 px-2 py-1 rounded">🕒 ${new Date(pedido.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                        <h3 class="font-bold text-xl text-white mb-3 border-b border-gray-800 pb-2">${pedido.cliente}</h3>
+                        <ul class="space-y-1 mb-5">${itensHtml}</ul>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-3 text-xs text-gray-400 font-bold px-1">
+                            <span>TOTAL:</span>
+                            <span class="text-green-400 text-sm font-extrabold">R$ ${pedido.total.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <button onclick="concluirPedido(${pedido.id})" class="w-full bg-green-600 hover:bg-green-700 active:scale-98 text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                            <span>Marcar como Pronto</span> ✅
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function concluirPedido(id) {
+            const { error } = await sb
+                .from('pedidos')
+                .update({ status: 'concluido' })
+                .eq('id', id);
+            
+            if (!error) {
+                carregarPedidosPendentes();
+            }
+        }
+
+        // Tempo Real (WebSockets) via Supabase
+        sb.channel('public:pedidos')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, () => {
+              carregarPedidosPendentes();
+              // Opcional: Tocar um bipe sonoro leve quando chega pedido novo
+              tocarAlertaSonoro();
+          })
+          .subscribe((status) => {
+              if (status === 'SUBSCRIBED') {
+                  const lbl = document.getElementById('statusConexao');
+                  const dot = document.getElementById('dotStatus');
+                  lbl.innerText = 'Ao vivo (Conectado)';
+                  lbl.className = 'text-xs font-semibold text-green-400';
+                  dot.className = 'w-2.5 h-2.5 rounded-full bg-green-500';
+              }
+          });
+
+        function tocarAlertaSonoro() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = 587.33; // Nota D5
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch(e) {
+                // Navegador bloqueia se usuário não interagiu antes, ignorar
+            }
+        }
+
+        carregarPedidosPendentes();
+    </script>
+</body>
+</html>

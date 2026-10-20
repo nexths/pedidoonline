@@ -1,0 +1,155 @@
+a<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDV / Caixa - Gestão de Mesas e Contas</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen p-6">
+    <!-- Header do Caixa -->
+    <header class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-emerald-400 tracking-wide">💵 PDV & Caixa - Fechamento de Mesas</h1>
+            <p class="text-xs text-gray-400 mt-0.5">Acompanhamento financeiro e consumo por mesa em tempo real</p>
+        </div>
+        <div class="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-full">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse" id="dotStatus"></span>
+            <span id="statusConexao" class="text-xs font-semibold text-yellow-400">Conectando...</span>
+        </div>
+    </header>
+
+    <!-- Grid de Mesas / Comandas Abertas -->
+    <div id="listaCaixa" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Os cards de consumo por mesa entram aqui -->
+    </div>
+
+    <!-- Script de Controle do Caixa -->
+    <script>
+        const supabaseUrl = 'https://lcwmwyreawzjrggnbpcz.supabase.co';
+        const supabaseKey = 'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4';
+        const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function carregarMesasAbertas() {
+            // Busca todos os pedidos que ainda estão pendentes (ou não concluídos/pagos)
+            const { data, error } = await sb
+                .from('pedidos')
+                .select('*')
+                .eq('status', 'pendente')
+                .order('created_at', { ascending: true });
+
+            if (!error && data) {
+                agruparEExibirMesas(data);
+            }
+        }
+
+        function agruparEExibirMesas(pedidos) {
+            const container = document.getElementById('listaCaixa');
+            container.innerHTML = '';
+
+            if (pedidos.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-20">
+                        <p class="text-gray-500 text-base font-medium">Nenhuma mesa com consumo aberto no momento. Caixa livre! 💰</p>
+                    </div>`;
+                return;
+            }
+
+            // Agrupa os pedidos por Mesa para somar tudo o que a mesa consumiu
+            const mesasMap = {};
+            pedidos.forEach(pedido => {
+                const mesa = pedido.mesa || 'Mesa 01';
+                if (!mesasMap[mesa]) {
+                    mesasMap[mesa] = {
+                        mesa: mesa,
+                        pedidosIds: [],
+                        clientes: new Set(),
+                        itensGerais: [],
+                        totalGeral: 0
+                    };
+                }
+                mesasMap[mesa].pedidosIds.push(pedido.id);
+                mesasMap[mesa].clientes.add(pedido.cliente);
+                mesasMap[mesa].totalGeral += Number(pedido.total);
+                
+                // Junta os itens de todos os pedidos daquela mesa
+                if (pedido.itens && Array.isArray(pedido.itens)) {
+                    pedido.itens.forEach(item => {
+                        mesasMap[mesa].itensGerais.push(item);
+                    });
+                }
+            });
+
+            // Cria um card visual para cada mesa ativa
+            Object.values(mesasMap).forEach(dadosMesa => {
+                let itensHtml = dadosMesa.itensGerais.map(i => `
+                    <li class="flex justify-between text-sm py-1 border-b border-gray-800/60 last:border-0">
+                        <span class="text-gray-300">• ${i.nome}</span>
+                        <span class="text-gray-400 text-xs">R$ ${Number(i.preco).toFixed(2).replace('.', ',')}</span>
+                    </li>
+                `).join('');
+
+                let listaClientes = Array.from(dadosMesa.clientes).join(', ');
+
+                let card = document.createElement('div');
+                card.className = 'bg-gray-900 border border-emerald-500/40 rounded-2xl p-5 shadow-xl flex flex-col justify-between hover:border-emerald-500 transition';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="bg-emerald-600 text-white px-3 py-1 rounded-lg font-black text-xs tracking-wider shadow-sm">${dadosMesa.mesa}</span>
+                            <span class="text-xs text-gray-400 font-mono bg-gray-800 px-2 py-1 rounded">👤 ${listaClientes}</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-200 mb-2 border-b border-gray-800 pb-2">Consumo Acumulado</h3>
+                        <ul class="space-y-1 mb-5 max-h-48 overflow-y-auto pr-1">${itensHtml}</ul>
+                    </div>
+                    <div class="border-t border-gray-800 pt-3">
+                        <div class="flex justify-between items-center mb-3 px-1">
+                            <span class="text-xs font-bold text-gray-400">TOTAL DA MESA:</span>
+                            <span class="text-emerald-400 text-lg font-black">R$ ${dadosMesa.totalGeral.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <button onclick='fecharConta(${JSON.stringify(dadosMesa.pedidosIds)})' class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                            <span>Receber e Fechar Mesa</span> 💳
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function fecharConta(pedidosIds) {
+            if (!confirm('Deseja realmente confirmar o pagamento e fechar a conta desta mesa?')) return;
+
+            // Atualiza o status de todos os pedidos daquela mesa para 'concluido' / 'pago'
+            for (let id of pedidosIds) {
+                await sb
+                    .from('pedidos')
+                    .update({ status: 'concluido' })
+                    .eq('id', id);
+            }
+
+            carregarMesasAbertas();
+        }
+
+        // Tempo Real (WebSockets) via Supabase para atualizar o caixa na hora
+        sb.channel('public:pedidos-caixa')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, () => {
+              carregarMesasAbertas();
+          })
+          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, () => {
+              carregarMesasAbertas();
+          })
+          .subscribe((status) => {
+              if (status === 'SUBSCRIBED') {
+                  const lbl = document.getElementById('statusConexao');
+                  const dot = document.getElementById('dotStatus');
+                  lbl.innerText = 'Ao vivo (Conectado)';
+                  lbl.className = 'text-xs font-semibold text-green-400';
+                  dot.className = 'w-2.5 h-2.5 rounded-full bg-green-500';
+              }
+          });
+
+        carregarMesasAbertas();
+    </script>
+</body>
+</html>

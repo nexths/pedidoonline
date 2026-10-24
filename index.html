@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Playfair+Display:ital,wght@1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* Animação suave para o dedo indicador / scroll */
         @keyframes bounceScroll {
             0%, 100% { transform: translateY(0); opacity: 0.7; }
             50% { transform: translateY(6px); opacity: 1; }
@@ -37,8 +36,8 @@
     <main class="max-w-md mx-auto p-4 space-y-4">
         
         <!-- CATEGORIA 1: Bebidas Quentes -->
-        <div class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-quentes')" class="w-full relative h-36 focus:outline-none group text-left">
+        <div id="card-quentes" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
+            <button onclick="toggleCategory('cat-quentes', 'card-quentes')" class="w-full relative h-36 focus:outline-none group text-left">
                 <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=80" alt="Bebidas Quentes" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
                     <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Bebidas Quentes</h2>
@@ -52,7 +51,6 @@
                 </div>
             </button>
             <div id="cat-quentes" class="hidden p-4 space-y-4 border-t border-[#231912] bg-[#0c0c0c]">
-                <!-- Item -->
                 <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
                     <div>
                         <h3 class="font-bold text-sm text-white">Café Expresso P (Puro / Leite)</h3>
@@ -61,7 +59,6 @@
                     </div>
                     <button onclick="adicionarItem('Café Expresso P', 7.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
                 </div>
-                <!-- Item -->
                 <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
                     <div>
                         <h3 class="font-bold text-sm text-white">Cappuccino</h3>
@@ -70,7 +67,6 @@
                     </div>
                     <button onclick="adicionarItem('Cappuccino', 12.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
                 </div>
-                <!-- Item -->
                 <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
                     <div>
                         <h3 class="font-bold text-sm text-white">Chocolate Quente</h3>
@@ -83,8 +79,8 @@
         </div>
 
         <!-- CATEGORIA 2: Especiais Anis -->
-        <div class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-especiais')" class="w-full relative h-36 focus:outline-none group text-left">
+        <div id="card-especiais" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
+            <button onclick="toggleCategory('cat-especiais', 'card-especiais')" class="w-full relative h-36 focus:outline-none group text-left">
                 <img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80" alt="Especiais Anis" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
                     <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Especiais Anis</h2>
@@ -134,8 +130,8 @@
         </div>
 
         <!-- CATEGORIA 3: Pães, Bolos e Doces -->
-        <div class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-paes')" class="w-full relative h-36 focus:outline-none group text-left">
+        <div id="card-paes" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
+            <button onclick="toggleCategory('cat-paes', 'card-paes')" class="w-full relative h-36 focus:outline-none group text-left">
                 <img src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&auto=format&fit=crop&q=80" alt="Pães e Doces" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
                     <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Pães, Bolos e Doces</h2>
@@ -185,8 +181,8 @@
         </div>
 
         <!-- CATEGORIA 4: Lanches -->
-        <div class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-lanches')" class="w-full relative h-36 focus:outline-none group text-left">
+        <div id="card-lanches" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
+            <button onclick="toggleCategory('cat-lanches', 'card-lanches')" class="w-full relative h-36 focus:outline-none group text-left">
                 <img src="https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&auto=format&fit=crop&q=80" alt="Lanches" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
                     <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Lanches</h2>
@@ -236,8 +232,8 @@
         </div>
 
         <!-- CATEGORIA 5: Focaccias & Salgados -->
-        <div class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-focaccias')" class="w-full relative h-36 focus:outline-none group text-left">
+        <div id="card-focaccias" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
+            <button onclick="toggleCategory('cat-focaccias', 'card-focaccias')" class="w-full relative h-36 focus:outline-none group text-left">
                 <img src="https://images.unsplash.com/photo-1509722747041-616f39b57569?w=500&auto=format&fit=crop&q=80" alt="Focaccias e Salgados" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
                     <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Focaccias & Salgados</h2>
@@ -279,8 +275,8 @@
         </div>
 
         <!-- CATEGORIA 6: Bebidas Frias & Cervejas -->
-        <div class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-bebidas')" class="w-full relative h-36 focus:outline-none group text-left">
+        <div id="card-bebidas" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
+            <button onclick="toggleCategory('cat-bebidas', 'card-bebidas')" class="w-full relative h-36 focus:outline-none group text-left">
                 <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&auto=format&fit=crop&q=80" alt="Bebidas Frias e Cervejas" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
                 <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
                     <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Bebidas Frias & Cervejas</h2>
@@ -351,11 +347,17 @@
 
         let carrinho = [];
 
-        // Função para expandir/ocultar os cards de categorias
-        function toggleCategory(id) {
-            const el = document.getElementById(id);
+        // Função para expandir/ocultar os cards de categorias com rolagem automática inteligente
+        function toggleCategory(catId, cardId) {
+            const el = document.getElementById(catId);
+            const card = document.getElementById(cardId);
+
             if (el.classList.contains('hidden')) {
                 el.classList.remove('hidden');
+                // Pequeno atraso para dar tempo de renderizar a altura e rolar certinho para a tela
+                setTimeout(() => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
             } else {
                 el.classList.add('hidden');
             }

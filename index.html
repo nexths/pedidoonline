@@ -1,428 +1,1874 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Café Anis - Cardápio & Pedidos</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Playfair+Display:ital,wght@1,400;1,500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-    <style>
-        @keyframes bounceScroll {
-            0%, 100% { transform: translateY(0); opacity: 0.7; }
-            50% { transform: translateY(6px); opacity: 1; }
-        }
-        .animate-swipe {
-            animation: bounceScroll 1.5s infinite ease-in-out;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Amora | Cardápio Digital</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+    --green: #536749;
+    --green-dark: #35472e;
+    --green-light: #eef2e9;
+    --text: #252823;
+    --muted: #91948c;
+    --line: #eeefeb;
+    --white: #ffffff;
+}
+
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    background: #fff;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    padding-bottom: 170px;
+}
+
+button, input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: 0;
+}
+
+button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+button, input {
+    outline-offset: 4px;
+}
+
+button {
+    transition: background .2s, transform .2s;
+}
+
+button:active {
+    transform: scale(.96);
+}
+
+svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.7;
+    flex-shrink: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 760px;
+    margin: auto;
+    padding: 0 24px;
+}
+
+/* CABEÇALHO */
+
+header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    padding-bottom: 22px;
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: .95;
+    letter-spacing: -2px;
+    color: var(--green-dark);
+}
+
+.logo span {
+    color: #98aa87;
+}
+
+.logo-subtitle {
+    font-size: 9px;
+    letter-spacing: 3.5px;
+    margin-top: 10px;
+    color: #818878;
+}
+
+.table-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green-light);
+    color: var(--green);
+    padding: 10px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.table-badge svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* APRESENTAÇÃO */
+
+.welcome {
+    padding-top: 29px;
+}
+
+.eyebrow {
+    color: var(--green);
+    letter-spacing: 2px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.welcome h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: clamp(28px, 6.5vw, 37px);
+    line-height: 1.2;
+    letter-spacing: -.8px;
+    margin: 8px 0;
+}
+
+.welcome p {
+    font-size: 13px;
+    color: #8c9086;
+    margin: 10px 0 22px;
+}
+
+/* PESQUISA */
+
+.search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f5f6f3;
+    padding: 14px 17px;
+    border-radius: 13px;
+}
+
+.search svg {
+    color: #949d8b;
+}
+
+.search input {
+    border: 0;
+    background: transparent;
+    outline: none;
+    min-width: 0;
+    width: 100%;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.search input::placeholder {
+    color: #a1a59a;
+}
+
+/* CATEGORIAS */
+
+.category-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fffffffa;
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line);
+    margin-top: 16px;
+}
+
+.categories {
+    display: flex;
+    gap: 9px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-top: 13px;
+    padding-bottom: 17px;
+}
+
+.categories::-webkit-scrollbar {
+    display: none;
+}
+
+.category {
+    flex-shrink: 0;
+    background: #f5f6f3;
+    color: #777e70;
+    padding: 10px 17px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.category.active {
+    background: var(--green);
+    color: white;
+}
+
+/* PRODUTOS */
+
+.section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 26px 0 6px;
+}
+
+.section-heading h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 25px;
+    margin: 0;
+}
+
+.section-heading span {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.product {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 21px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.product-image {
+    width: 108px;
+    height: 108px;
+    border-radius: 15px;
+    object-fit: cover;
+    background: #f1f2ee;
+    flex-shrink: 0;
+}
+
+.product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-info h3 {
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+
+.product-info p {
+    font-size: 12px;
+    color: #96998f;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.product-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+    margin-top: 13px;
+}
+
+.price {
+    font-size: 15px;
+    color: var(--green);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.quantity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.quantity button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--green-light);
+    color: var(--green);
+    padding: 0;
+}
+
+.quantity button svg {
+    width: 16px;
+    height: 16px;
+}
+
+.quantity span {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.quantity[data-empty="true"] .minus,
+.quantity[data-empty="true"] .count {
+    display: none;
+}
+
+/* CARRINHO E NAVEGAÇÃO */
+
+.bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    background: #fffffffa;
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -8px 40px #26312208;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.cart-button {
+    width: 100%;
+    background: var(--green);
+    color: #fff;
+    border-radius: 15px;
+    padding: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 13px 0 0;
+    min-height: 60px;
+}
+
+.cart-left {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.cart-label {
+    text-align: left;
+}
+
+.cart-label strong {
+    display: block;
+    font-size: 14px;
+}
+
+.cart-label small {
+    color: #dbe5d5;
+    font-size: 11px;
+}
+
+.cart-total {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 0;
+}
+
+.nav button {
+    background: transparent;
+    color: #a2a79b;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 90px;
+}
+
+.nav button.active {
+    color: var(--green);
+}
+
+/* PEDIDOS */
+
+.order-card {
+    border: 1px solid var(--line);
+    padding: 19px;
+    margin: 15px 0;
+    border-radius: 16px;
+}
+
+.order-header {
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.order-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.order-item {
+    padding: 15px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+}
+
+.order-total {
+    margin-top: 18px;
+    font-weight: 700;
+    color: var(--green);
+}
+
+.status {
+    display: inline-block;
+    font-size: 10px;
+    background: #f6eedb;
+    color: #96712d;
+    padding: 5px 9px;
+    border-radius: 20px;
+    margin-top: 5px;
+}
+
+.status.pronto,
+.status.pago {
+    background: #e8f0e2;
+    color: #536749;
+}
+
+.status.em_preparo {
+    background: #e8eef8;
+    color: #4c6b94;
+}
+
+.status.cancelado {
+    background: #fcece8;
+    color: #ad554a;
+}
+
+.cancelled {
+    color: #ad554a;
+    text-decoration: line-through;
+}
+
+.cancel-btn {
+    padding: 5px 0;
+    background: none;
+    color: #ad554a;
+    font-size: 11px;
+    display: block;
+    margin-left: auto;
+}
+
+/* JANELA DO CARRINHO */
+
+dialog {
+    width: min(94%, 480px);
+    border: 0;
+    border-radius: 24px;
+    padding: 25px;
+    color: var(--text);
+    max-height: 85dvh;
+    overflow: auto;
+}
+
+dialog::backdrop {
+    background: #18231780;
+    backdrop-filter: blur(4px);
+}
+
+dialog h2 {
+    font-family: 'Playfair Display', serif;
+    margin: 0;
+    font-size: 26px;
+}
+
+.icon-button {
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    color: var(--green);
+    background: var(--green-light);
+    display: grid;
+    place-items: center;
+}
+
+.cart-item {
+    padding: 17px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.cart-item small {
+    color: var(--green);
+}
+
+.customer-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 24px;
+}
+
+#customer {
+    width: 100%;
+    border: 1px solid #dfe4da;
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 8px;
+}
+
+.checkout-total {
+    margin: 24px 0;
+}
+
+.checkout-total strong:last-child {
+    color: var(--green);
+    font-size: 23px;
+}
+
+.send-button {
+    background: var(--green);
+    color: white;
+    width: 100%;
+    padding: 16px;
+    border-radius: 13px;
+    font-weight: 700;
+}
+
+#cartMessage {
+    color: #8d7660;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.notice {
+    background: #f5f6f2;
+    border-radius: 12px;
+    padding: 17px;
+    margin: 20px 0;
+    color: #777e70;
+    font-size: 13px;
+}
+
+.empty {
+    padding: 35px 15px;
+    text-align: center;
+    color: #8b9185;
+    font-size: 14px;
+}
+
+.footer-note {
+    font-size: 10px;
+    text-align: center;
+    color: #b2b6ac;
+    margin: 35px 0 0;
+    letter-spacing: .6px;
+}
+
+#toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: var(--green-dark);
+    color: white;
+    padding: 13px 18px;
+    border-radius: 12px;
+    width: max-content;
+    max-width: 90%;
+    font-size: 13px;
+    text-align: center;
+    box-shadow: 0 6px 24px #0002;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media(max-width: 380px) {
+
+    .container {
+        padding-left: 17px;
+        padding-right: 17px;
+    }
+
+    .product {
+        gap: 12px;
+    }
+
+    .product-image {
+        width: 88px;
+        height: 95px;
+    }
+
+    .quantity {
+        gap: 5px;
+    }
+
+    .quantity button {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media(min-width: 700px) {
+
+    body {
+        background: #f7f8f5;
+    }
+
+    header,
+    .category-bar {
+        max-width: 760px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    main {
+        max-width: 760px;
+        margin: auto;
+        background: white;
+        min-height: 80vh;
+        padding-bottom: 30px;
+    }
+
+    .product-image {
+        width: 125px;
+        height: 115px;
+    }
+
+    .product-info h3 {
+        font-size: 17px;
+    }
+
+    .product-info p {
+        font-size: 13px;
+    }
+
+    .bottom {
+        max-width: 760px;
+        margin: auto;
+    }
+}
+
+</style>
 </head>
-<body class="bg-[#060606] text-white pb-36 font-['Plus_Jakarta_Sans',sans-serif]">
-    
-    <!-- Header Principal -->
-    <header class="bg-[#121212]/95 backdrop-blur border-b border-[#231912] p-4 sticky top-0 z-30 shadow-md">
-        <div class="max-w-md mx-auto flex justify-between items-center">
+
+<body>
+
+<header>
+
+    <div class="container header-content">
+
+        <div>
+            <div class="logo">amora<span>.</span></div>
+            <div class="logo-subtitle">BISTRÔ & CAFÉ</div>
+        </div>
+
+        <div class="table-badge">
+            <i data-lucide="utensils"></i>
+            <span id="mesaLabel">Mesa 01</span>
+        </div>
+
+    </div>
+
+</header>
+
+<main>
+
+    <div id="menuView">
+
+        <section class="container welcome">
+
+            <div class="eyebrow">Feito com carinho</div>
+
+            <h1>O que vamos<br>saborear hoje?</h1>
+
+            <p>Escolha seu favorito e aproveite o momento.</p>
+
+            <div class="search">
+
+                <i data-lucide="search"></i>
+
+                <input
+                    id="search"
+                    type="search"
+                    placeholder="Encontre seu favorito"
+                    aria-label="Pesquisar produtos"
+                >
+
+            </div>
+
+        </section>
+
+        <div class="category-bar">
+
+            <nav
+                class="container categories"
+                id="categories"
+            ></nav>
+
+        </div>
+
+        <section class="container">
+
+            <div id="notice" class="notice">
+                Carregando cardápio...
+            </div>
+
+            <div id="products"></div>
+
+            <div class="footer-note">
+                AMORA BISTRÔ & CAFÉ · Fotos ilustrativas
+            </div>
+
+        </section>
+
+    </div>
+
+    <section
+        id="ordersView"
+        class="container welcome"
+        hidden
+    >
+
+        <div class="eyebrow">Seu atendimento</div>
+
+        <h1>Meus pedidos</h1>
+
+        <p>Acompanhe o preparo em tempo real.</p>
+
+        <div id="orders"></div>
+
+    </section>
+
+</main>
+
+<div class="bottom">
+
+    <div class="container">
+
+        <button class="cart-button" id="cartOpen" disabled>
+
+            <div class="cart-left">
+
+                <i data-lucide="shopping-bag"></i>
+
+                <div class="cart-label">
+
+                    <strong>Meu pedido</strong>
+
+                    <small id="cartCount">0 itens</small>
+
+                </div>
+
+            </div>
+
+            <span class="cart-total" id="cartTotal">
+                R$ 0,00
+            </span>
+
+        </button>
+
+        <nav class="nav">
+
+            <button id="menuTab" class="active">
+
+                <i data-lucide="book-open"></i>
+
+                Cardápio
+
+            </button>
+
+            <button id="ordersTab">
+
+                <i data-lucide="receipt-text"></i>
+
+                Meus pedidos
+
+            </button>
+
+        </nav>
+
+    </div>
+
+</div>
+
+<dialog id="cart">
+
+    <div class="row">
+
+        <h2>Meu pedido</h2>
+
+        <button
+            class="icon-button"
+            id="closeCart"
+            aria-label="Fechar carrinho"
+        >
+            <i data-lucide="x"></i>
+        </button>
+
+    </div>
+
+    <div id="cartItems"></div>
+
+    <label for="customer" class="customer-label">
+        Como podemos chamar você?
+    </label>
+
+    <input
+        id="customer"
+        placeholder="Seu nome"
+        maxlength="100"
+        autocomplete="given-name"
+    >
+
+    <div class="row checkout-total">
+
+        <strong>Total estimado</strong>
+
+        <strong id="checkoutTotal">R$ 0,00</strong>
+
+    </div>
+
+    <button class="send-button" id="send">
+        Enviar pedido
+    </button>
+
+    <p id="cartMessage" role="status"></p>
+
+</dialog>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+
+/* SUPABASE */
+
+const sb = window.supabase.createClient(
+    'https://lcwmwyreawzjrggnbpcz.supabase.co',
+    'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4',
+    {
+        auth: {
+            storageKey: 'amora-cardapio-auth'
+        }
+    }
+);
+
+const $ = id => document.getElementById(id);
+
+const money = n =>
+    Number(n || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+
+const esc = value =>
+    String(value ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[c]));
+
+function icons() {
+    window.lucide?.createIcons();
+}
+
+/* IDENTIFICAR MESA */
+
+const raw = new URLSearchParams(
+    location.search
+).get('mesa') || '01';
+
+const valid =
+    /^\d{1,2}$/.test(raw) &&
+    Number(raw) >= 1 &&
+    Number(raw) <= 20;
+
+const mesa = 'Mesa ' + raw.padStart(2, '0');
+
+$('mesaLabel').textContent =
+    valid ? mesa : 'Mesa inválida';
+
+/* CATEGORIAS */
+
+const categories = [
+    ['Bebidas Quentes', 'Cafés'],
+    ['Especiais Amora', 'Especiais'],
+    ['Pães, Bolos e Doces', 'Doces'],
+    ['Lanches', 'Lanches'],
+    ['Focaccias e Salgados', 'Salgados'],
+    ['Bebidas Frias', 'Bebidas']
+];
+
+/* FOTOS E DESCRIÇÕES ILUSTRATIVAS */
+
+const catalog = {
+
+    'Café Expresso P': [
+        'photo-1510707577719-ae7c14805e3a',
+        'Intenso, aromático e encorpado.'
+    ],
+
+    'Cappuccino': [
+        'photo-1572442388796-11668a67e53d',
+        'Cremoso com um toque especial da casa.'
+    ],
+
+    'Chocolate Quente': [
+        'photo-1542990253-0d0f5be5f0ed',
+        'Encorpado e reconfortante.'
+    ],
+
+    'Latte Gelado': [
+        'photo-1517701604599-bb29b565090c',
+        'Café expresso, leite gelado e baunilha.'
+    ],
+
+    'Mocha Gelado': [
+        'photo-1461023058943-07fcbe16d735',
+        'Café expresso, chocolate e leite gelado.'
+    ],
+
+    'Affogato': [
+        'photo-1563805042-7684c019e1cb',
+        'Sorvete de baunilha com café expresso.'
+    ],
+
+    'Pink Lemonade': [
+        'photo-1513558161293-cdaf765edfd4',
+        'Limão, água com gás e frutas vermelhas.'
+    ],
+
+    'Pão com Manteiga na Chapa': [
+        'photo-1509440159596-0249088772ff',
+        'Quentinho, dourado e crocante.'
+    ],
+
+    'Pão de Queijo Grande': [
+        'photo-1558961363-fa8fdf82db35',
+        'Tradicional e irresistível.'
+    ],
+
+    'Honey Toast': [
+        'photo-1484723091739-30a097e8f929',
+        'Uma fatia generosa com toque de mel.'
+    ],
+
+    'Bolos Recheados Especiais': [
+        'photo-1578985545062-69928b1d9587',
+        'Deliciosas opções artesanais do dia.'
+    ],
+
+    'Queijo Quente': [
+        'photo-1528735602780-2552fd46c7af',
+        'Pão tostado com queijo derretido.'
+    ],
+
+    'Bauru': [
+        'photo-1553909489-cd47e0907980',
+        'Presunto, queijo e tomate.'
+    ],
+
+    'Croque Monsieur': [
+        'photo-1528735602780-2552fd46c7af',
+        'Presunto, queijo e molho bechamel gratinado.'
+    ],
+
+    'Croque Madame': [
+        'photo-1484723091739-30a097e8f929',
+        'Croque monsieur finalizado com ovo frito.'
+    ],
+
+    'Sanduíche de Focaccia Parma': [
+        'photo-1509722747041-616f39b57569',
+        'Sanduíche preparado com focaccia.'
+    ],
+
+    'Empanada': [
+        'photo-1601050690597-df0568f70950',
+        'Salgado artesanal recheado.'
+    ],
+
+    'Torta de Frango': [
+        'photo-1600628422019-6c2e0b48f25b',
+        'Fatia de torta cremosa de frango.'
+    ],
+
+    'Refrigerante Lata': [
+        'photo-1622483767028-3f66f32aef97',
+        'Geladíssimo.'
+    ],
+
+    'Suco de Frutas': [
+        'photo-1600271886742-f049cd451bba',
+        'Natural e refrescante.'
+    ],
+
+    'Cerveja Long Neck': [
+        'photo-1535958636474-b021ee887b13',
+        'Servida gelada.'
+    ]
+
+};
+
+const placeholder =
+    'data:image/svg+xml;charset=UTF-8,' +
+    encodeURIComponent(`
+        <svg xmlns="http://www.w3.org/2000/svg"
+             width="240" height="240">
+            <rect width="240" height="240"
+                  fill="#eef2e9"/>
+            <text x="120" y="126"
+                  text-anchor="middle"
+                  font-size="25"
+                  font-family="Georgia"
+                  fill="#536749">amora.</text>
+        </svg>
+    `);
+
+function photo(p) {
+
+    if (p.imagem) {
+
+        try {
+
+            if (new URL(p.imagem).protocol === 'https:') {
+                return p.imagem;
+            }
+
+        } catch {}
+    }
+
+    const id = catalog[p.nome]?.[0];
+
+    return id
+        ? 'https://images.unsplash.com/' + id +
+          '?w=320&h=320&fit=crop&auto=format&q=85'
+        : placeholder;
+}
+
+/* ESTADO */
+
+let products = [];
+let orders = [];
+let basket = new Map();
+
+let activeCategory = 'Todos';
+let uid = null;
+let ready = false;
+let busy = false;
+let seq = 0;
+let toastTimer;
+
+/* NOTIFICAÇÕES */
+
+function toast(message) {
+
+    $('toast').textContent = message;
+    $('toast').hidden = false;
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+        $('toast').hidden = true;
+    }, 3200);
+}
+
+function notice(message) {
+
+    $('notice').textContent = message;
+    $('notice').hidden = !message;
+}
+
+/* NORMALIZAR PESQUISA */
+
+function normalize(text) {
+
+    return String(text || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase();
+}
+
+/* CATEGORIAS INTERATIVAS */
+
+function renderCategories() {
+
+    const known = categories.filter(([name]) =>
+        products.some(p => p.categoria === name)
+    );
+
+    const extras = [...new Set(
+        products.map(p => p.categoria)
+    )].filter(name =>
+        !categories.some(c => c[0] === name)
+    ).map(name => [name, name]);
+
+    const list = [
+        ['Todos', 'Todos'],
+        ...known,
+        ...extras
+    ];
+
+    $('categories').innerHTML = list.map(
+        ([name, label]) => `
+
+            <button
+                class="category ${
+                    activeCategory === name ? 'active' : ''
+                }"
+                data-category="${esc(name)}"
+            >
+                ${esc(label)}
+            </button>
+
+        `
+    ).join('');
+}
+
+/* CONTROLE DE QUANTIDADES */
+
+function quantityHTML(id) {
+
+    const n = basket.get(String(id)) || 0;
+
+    return `
+
+        <div class="quantity" data-empty="${n === 0}">
+
+            <button
+                class="minus"
+                data-id="${esc(id)}"
+                data-delta="-1"
+                aria-label="Remover produto"
+            >
+                <i data-lucide="minus"></i>
+            </button>
+
+            <span
+                class="count"
+                data-count="${esc(id)}"
+            >${n}</span>
+
+            <button
+                data-id="${esc(id)}"
+                data-delta="1"
+                aria-label="Adicionar produto"
+            >
+                <i data-lucide="plus"></i>
+            </button>
+
+        </div>
+
+    `;
+}
+
+function count() {
+
+    return [...basket.values()]
+        .reduce((a, b) => a + b, 0);
+}
+
+function total() {
+
+    return products.reduce(
+        (sum, p) =>
+            sum +
+            Number(p.preco) *
+            (basket.get(String(p.id)) || 0),
+        0
+    );
+}
+
+function changeQty(id, delta) {
+
+    if (busy || !ready) return;
+
+    if (delta > 0 && count() >= 50) {
+
+        toast('Limite de 50 itens por pedido.');
+        return;
+    }
+
+    const n = (basket.get(id) || 0) + delta;
+
+    if (n <= 0) {
+        basket.delete(id);
+    } else {
+        basket.set(id, n);
+    }
+
+    document.querySelectorAll(
+        '[data-count="' + id + '"]'
+    ).forEach(el => {
+
+        el.textContent = basket.get(id) || 0;
+
+        el.parentElement.dataset.empty =
+            String(!basket.get(id));
+    });
+
+    renderCart();
+}
+
+/* EXIBIR PRODUTOS */
+
+function renderProducts() {
+
+    const search = normalize($('search').value);
+
+    const list = products.filter(p => {
+
+        const description =
+            p.descricao || catalog[p.nome]?.[1] || '';
+
+        const matchesSearch = normalize(
+            p.nome + ' ' + description + ' ' + p.categoria
+        ).includes(search);
+
+        return matchesSearch && (
+            activeCategory === 'Todos' ||
+            p.categoria === activeCategory
+        );
+    });
+
+    const groups = [...new Set([
+        ...categories.map(c => c[0]),
+        ...list.map(p => p.categoria)
+    ])];
+
+    $('products').innerHTML = groups.map(category => {
+
+        const group = list.filter(
+            p => p.categoria === category
+        );
+
+        if (!group.length) return '';
+
+        return `
+
+            <div class="section-heading">
+
+                <h2>${esc(category)}</h2>
+
+                <span>${group.length} opções</span>
+
+            </div>
+
+            ${group.map(p => `
+
+                <article class="product">
+
+                    <img
+                        class="product-image"
+                        src="${esc(photo(p))}"
+                        alt="${esc(p.nome)}"
+                        loading="lazy"
+                    >
+
+                    <div class="product-info">
+
+                        <h3>${esc(p.nome)}</h3>
+
+                        <p>${esc(
+                            p.descricao ||
+                            catalog[p.nome]?.[1] || ''
+                        )}</p>
+
+                        <div class="product-bottom">
+
+                            <span class="price">
+                                ${money(p.preco)}
+                            </span>
+
+                            ${quantityHTML(p.id)}
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            `).join('')}
+
+        `;
+
+    }).join('') ||
+
+    '<div class="empty">Nenhum produto encontrado.</div>';
+
+    icons();
+}
+
+document.addEventListener('error', e => {
+
+    if (
+        e.target.classList?.contains('product-image') &&
+        e.target.src !== placeholder
+    ) {
+        e.target.src = placeholder;
+    }
+
+}, true);
+
+/* PESQUISA */
+
+$('search').addEventListener('input', () => {
+
+    activeCategory = 'Todos';
+
+    renderCategories();
+    renderProducts();
+});
+
+/* CARRINHO */
+
+function renderCart() {
+
+    $('cartCount').textContent =
+        count() + (count() === 1 ? ' item' : ' itens');
+
+    $('cartTotal').textContent = money(total());
+
+    $('checkoutTotal').textContent = money(total());
+
+    $('cartOpen').disabled = !ready;
+
+    $('send').disabled = busy || !ready || !count();
+
+    $('cartItems').innerHTML = products.filter(
+        p => basket.has(String(p.id))
+    ).map(p => `
+
+        <div class="row cart-item">
+
             <div>
-                <h1 class="font-['Cinzel',serif] text-lg font-bold tracking-wider text-[#dfb18a]">CAFÉ ANIS</h1>
-                <p id="labelMesa" class="text-xs text-gray-400 font-medium">Carregando mesa...</p>
-            </div>
-            <span class="bg-[#dfb18a]/15 border border-[#dfb18a]/30 text-[#dfb18a] text-xs px-2.5 py-1 rounded-full font-bold">🟢 Aberto</span>
-        </div>
-    </header>
 
-    <!-- Conteúdo do Cardápio (Cards Expansíveis) -->
-    <main class="max-w-md mx-auto p-4 space-y-4">
-        
-        <!-- CATEGORIA 1: Bebidas Quentes -->
-        <div id="card-quentes" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-quentes', 'card-quentes')" class="w-full relative h-36 focus:outline-none group text-left">
-                <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=80" alt="Bebidas Quentes" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
-                    <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Bebidas Quentes</h2>
-                    <p class="text-xs text-gray-300 flex items-center justify-between mt-1">
-                        <span>Cafés expressos, coados e cappuccinos</span>
-                        <span class="flex items-center gap-1 text-[10px] bg-[#dfb18a]/20 text-[#dfb18a] px-2 py-0.5 rounded-full border border-[#dfb18a]/30">
-                            Toque para abrir 
-                            <svg class="w-3 h-3 animate-swipe" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                        </span>
-                    </p>
-                </div>
-            </button>
-            <div id="cat-quentes" class="hidden p-4 space-y-4 border-t border-[#231912] bg-[#0c0c0c]">
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Café Expresso P (Puro / Leite)</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Café expresso de alta qualidade.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 7,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Café Expresso P', 7.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Cappuccino</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Cremoso com toque especial da casa.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 12,00</span>
-                    </div>
-                    <button onclick="adicionarItem('Cappuccino', 12.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Chocolate Quente</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Encorpado e reconfortante.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 12,00</span>
-                    </div>
-                    <button onclick="adicionarItem('Chocolate Quente', 12.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-            </div>
-        </div>
+                <strong>${esc(p.nome)}</strong>
 
-        <!-- CATEGORIA 2: Especiais Anis -->
-        <div id="card-especiais" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-especiais', 'card-especiais')" class="w-full relative h-36 focus:outline-none group text-left">
-                <img src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80" alt="Especiais Anis" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
-                    <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Especiais Anis</h2>
-                    <p class="text-xs text-gray-300 flex items-center justify-between mt-1">
-                        <span>Bebidas geladas com personalidade</span>
-                        <span class="flex items-center gap-1 text-[10px] bg-[#dfb18a]/20 text-[#dfb18a] px-2 py-0.5 rounded-full border border-[#dfb18a]/30">
-                            Toque para abrir 
-                            <svg class="w-3 h-3 animate-swipe" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                        </span>
-                    </p>
-                </div>
-            </button>
-            <div id="cat-especiais" class="hidden p-4 space-y-4 border-t border-[#231912] bg-[#0c0c0c]">
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Latte Gelado Anis</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Expresso, leite gelado, baunilha, gelo e espuma.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 16,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Latte Gelado Anis', 16.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Mocha Gelado Anis</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Expresso, calda de chocolate, leite gelado e espuma.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 18,00</span>
-                    </div>
-                    <button onclick="adicionarItem('Mocha Gelado Anis', 18.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Affogato Anis</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Duas bolas de sorvete de baunilha com café expresso.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 20,00</span>
-                    </div>
-                    <button onclick="adicionarItem('Affogato Anis', 20.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Pink Lemonade</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Água com gás, limão e xarope de frutas vermelhas.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 16,00</span>
-                    </div>
-                    <button onclick="adicionarItem('Pink Lemonade', 16.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-            </div>
-        </div>
+                <br>
 
-        <!-- CATEGORIA 3: Pães, Bolos e Doces -->
-        <div id="card-paes" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-paes', 'card-paes')" class="w-full relative h-36 focus:outline-none group text-left">
-                <img src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&auto=format&fit=crop&q=80" alt="Pães e Doces" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
-                    <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Pães, Bolos e Doces</h2>
-                    <p class="text-xs text-gray-300 flex items-center justify-between mt-1">
-                        <span>Pão na chapa, pão de queijo e bolos artesanais</span>
-                        <span class="flex items-center gap-1 text-[10px] bg-[#dfb18a]/20 text-[#dfb18a] px-2 py-0.5 rounded-full border border-[#dfb18a]/30">
-                            Toque para abrir 
-                            <svg class="w-3 h-3 animate-swipe" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                        </span>
-                    </p>
-                </div>
-            </button>
-            <div id="cat-paes" class="hidden p-4 space-y-4 border-t border-[#231912] bg-[#0c0c0c]">
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Pão com Manteiga na Chapa</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Quentinho e crocante.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 8,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Pão com Manteiga na Chapa', 8.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Pão de Queijo Grande (Unidade)</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Tradicional e irresistível.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 10,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Pão de Queijo Grande', 10.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Honey Toast</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Fatia generosa com toque de mel.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 16,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Honey Toast', 16.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Bolos Recheados Especiais (Fatia)</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Deliciosas opções artesanais do dia.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 18,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Bolos Recheados Especiais', 18.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-            </div>
-        </div>
+                <small>${money(p.preco)}</small>
 
-        <!-- CATEGORIA 4: Lanches -->
-        <div id="card-lanches" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-lanches', 'card-lanches')" class="w-full relative h-36 focus:outline-none group text-left">
-                <img src="https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&auto=format&fit=crop&q=80" alt="Lanches" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
-                    <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Lanches</h2>
-                    <p class="text-xs text-gray-300 flex items-center justify-between mt-1">
-                        <span>Queijo quente, bauru e croque monsieur</span>
-                        <span class="flex items-center gap-1 text-[10px] bg-[#dfb18a]/20 text-[#dfb18a] px-2 py-0.5 rounded-full border border-[#dfb18a]/30">
-                            Toque para abrir 
-                            <svg class="w-3 h-3 animate-swipe" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                        </span>
-                    </p>
-                </div>
-            </button>
-            <div id="cat-lanches" class="hidden p-4 space-y-4 border-t border-[#231912] bg-[#0c0c0c]">
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Queijo Quente</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Pão da casa com queijo derretido.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 17,00</span>
-                    </div>
-                    <button onclick="adicionarItem('Queijo Quente', 17.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Bauru</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Pão da casa, presunto, queijo e tomate.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 19,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Bauru', 19.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Croque Monsieur</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Presunto e queijo com molho bechamel gratinado.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 29,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Croque Monsieur', 29.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Croque Madame</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Croque monsieur finalizado com ovo frito.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 34,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Croque Madame', 34.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CATEGORIA 5: Focaccias & Salgados -->
-        <div id="card-focaccias" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-focaccias', 'card-focaccias')" class="w-full relative h-36 focus:outline-none group text-left">
-                <img src="https://images.unsplash.com/photo-1509722747041-616f39b57569?w=500&auto=format&fit=crop&q=80" alt="Focaccias e Salgados" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
-                    <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Focaccias & Salgados</h2>
-                    <p class="text-xs text-gray-300 flex items-center justify-between mt-1">
-                        <span>Sanduíches de focaccia, empanadas e tortas</span>
-                        <span class="flex items-center gap-1 text-[10px] bg-[#dfb18a]/20 text-[#dfb18a] px-2 py-0.5 rounded-full border border-[#dfb18a]/30">
-                            Toque para abrir 
-                            <svg class="w-3 h-3 animate-swipe" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                        </span>
-                    </p>
-                </div>
-            </button>
-            <div id="cat-focaccias" class="hidden p-4 space-y-4 border-t border-[#231912] bg-[#0c0c0c]">
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Sanduíche de Focaccia Parma</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Queijo, tomate e requeijão com manjericão.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 34,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Sanduíche de Focaccia Parma', 34.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Empanada</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Salgado artesanal recheado.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 11,00</span>
-                    </div>
-                    <button onclick="adicionarItem('Empanada', 11.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Torta de Frango</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Fatia de torta cremosa de frango.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 15,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Torta de Frango', 15.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- CATEGORIA 6: Bebidas Frias & Cervejas -->
-        <div id="card-bebidas" class="bg-[#121212] border border-[#231912] rounded-2xl overflow-hidden shadow-md transition-all">
-            <button onclick="toggleCategory('cat-bebidas', 'card-bebidas')" class="w-full relative h-36 focus:outline-none group text-left">
-                <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&auto=format&fit=crop&q=80" alt="Bebidas Frias e Cervejas" class="w-full h-full object-cover brightness-70 group-hover:brightness-90 transition">
-                <div class="absolute inset-0 bg-gradient-to-t from-[#121212] via-[#121212]/40 to-transparent flex flex-col justify-end p-4">
-                    <h2 class="font-['Cinzel',serif] text-lg font-bold text-[#dfb18a]">Bebidas Frias & Cervejas</h2>
-                    <p class="text-xs text-gray-300 flex items-center justify-between mt-1">
-                        <span>Refrigerantes, sucos e cervejas geladas</span>
-                        <span class="flex items-center gap-1 text-[10px] bg-[#dfb18a]/20 text-[#dfb18a] px-2 py-0.5 rounded-full border border-[#dfb18a]/30">
-                            Toque para abrir 
-                            <svg class="w-3 h-3 animate-swipe" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-                        </span>
-                    </p>
-                </div>
-            </button>
-            <div id="cat-bebidas" class="hidden p-4 space-y-4 border-t border-[#231912] bg-[#0c0c0c]">
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Refrigerante Lata</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Geladíssimo.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 7,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Refrigerante Lata', 7.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Suco de Frutas</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Natural e refrescante.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 13,50</span>
-                    </div>
-                    <button onclick="adicionarItem('Suco de Frutas', 13.50)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-                <div class="flex justify-between items-center gap-3 bg-[#161616] p-3 rounded-xl border border-[#231912]">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Cerveja Long Neck (Heineken / Corona)</h3>
-                        <p class="text-[11px] text-gray-400 mt-0.5">Gelada.</p>
-                        <span class="text-[#dfb18a] font-extrabold text-sm mt-1 block">R$ 12,00</span>
-                    </div>
-                    <button onclick="adicionarItem('Cerveja Long Neck', 12.00)" class="bg-[#dfb18a] text-gray-900 px-3 py-2 rounded-xl text-xs font-bold hover:bg-[#c99d75] active:scale-95 transition whitespace-nowrap shadow-sm">Adicionar +</button>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Rodapé Fixo do Carrinho -->
-    <footer class="bg-[#121212]/95 backdrop-blur border-t border-[#231912] p-4 fixed bottom-0 left-0 right-0 shadow-2xl z-30">
-        <div class="max-w-md mx-auto space-y-2.5">
-            <input type="text" id="nomeCliente" placeholder="Digite seu nome (Obrigatório)" class="w-full bg-[#1e140e] border border-[#36271e] text-white placeholder-gray-400 p-2.5 rounded-xl text-sm focus:outline-none focus:border-[#dfb18a] font-medium" required>
-            
-            <div class="flex justify-between items-center font-bold text-base px-1">
-                <span class="text-gray-400">Total do Pedido:</span>
-                <span id="totalCarrinho" class="text-[#dfb18a] text-lg">R$ 0,00</span>
             </div>
 
-            <button onclick="enviarPedido()" class="w-full bg-[#dfb18a] text-gray-900 py-3 rounded-xl font-bold text-sm hover:bg-[#c99d75] active:scale-98 transition shadow-md flex items-center justify-center gap-2">
-                <span>Fazer Pedido para a Cozinha</span> 🚀
-            </button>
+            ${quantityHTML(p.id)}
+
         </div>
-    </footer>
 
-    <!-- Lógica JavaScript -->
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const numeroMesa = urlParams.get('mesa') || '01';
-        document.getElementById('labelMesa').innerText = `Atendimento Digital • Mesa ${numeroMesa}`;
+    `).join('') ||
 
-        const supabaseUrl = 'https://lcwmwyreawzjrggnbpcz.supabase.co';
-        const supabaseKey = 'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4';
-        const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+    '<div class="empty">Seu carrinho está vazio.</div>';
 
-        let carrinho = [];
+    icons();
+}
 
-        // Função para expandir/ocultar os cards de categorias com rolagem automática inteligente
-        function toggleCategory(catId, cardId) {
-            const el = document.getElementById(catId);
-            const card = document.getElementById(cardId);
+$('cartOpen').onclick = () => {
 
-            if (el.classList.contains('hidden')) {
-                el.classList.remove('hidden');
-                // Pequeno atraso para dar tempo de renderizar a altura e rolar certinho para a tela
-                setTimeout(() => {
-                    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-            } else {
-                el.classList.add('hidden');
+    $('cartMessage').textContent = '';
+
+    $('cart').showModal();
+};
+
+$('closeCart').onclick = () => {
+
+    if (!busy) $('cart').close();
+};
+
+$('cart').addEventListener('cancel', e => {
+
+    if (busy) e.preventDefault();
+});
+
+/* ENVIAR PEDIDO */
+
+$('send').onclick = async () => {
+
+    if (busy || !ready || !count()) return;
+
+    const name = $('customer').value.trim();
+
+    if (!name) {
+
+        $('cartMessage').textContent =
+            'Informe seu nome para continuar.';
+
+        $('customer').focus();
+        return;
+    }
+
+    busy = true;
+
+    renderCart();
+
+    $('cartMessage').textContent =
+        'Enviando seu pedido...';
+
+    try {
+
+        const ids = [...basket].flatMap(
+            ([id, n]) => Array(n).fill(Number(id))
+        );
+
+        const { data, error } = await sb.rpc(
+            'criar_pedido',
+            {
+                p_mesa: mesa,
+                p_cliente: name,
+                p_produtos: ids
             }
+        );
+
+        if (error) throw error;
+
+        basket.clear();
+
+        renderProducts();
+
+        $('cart').close();
+
+        toast('Pedido enviado com sucesso!');
+
+        showTab('orders');
+
+    } catch (e) {
+
+        $('cartMessage').textContent =
+            'Não foi possível confirmar o envio. ' +
+            e.message +
+            '. Confira Meus pedidos antes de tentar novamente.';
+
+    } finally {
+
+        busy = false;
+
+        renderCart();
+    }
+};
+
+/* STATUS DOS PEDIDOS */
+
+const labels = {
+    pendente: 'Aguardando preparo',
+    em_preparo: 'Em preparo',
+    pronto: 'Pronto',
+    cancelado: 'Cancelado'
+};
+
+function renderOrders() {
+
+    $('orders').innerHTML = orders.map(o => {
+
+        const payment =
+            o.status_pagamento === 'pago'
+            ? 'Pago'
+            : o.status_pagamento === 'cancelado'
+            ? 'Cancelado'
+            : 'Em aberto';
+
+        return `
+
+            <article class="order-card">
+
+                <div class="row order-header">
+
+                    <div>
+
+                        <h3>Pedido #${esc(o.id)}</h3>
+
+                        <span style="
+                            font-size:11px;
+                            color:#96998f
+                        ">
+                            ${new Date(o.created_at)
+                                .toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                })}
+                        </span>
+
+                    </div>
+
+                    <span class="status ${esc(o.status_pagamento)}">
+
+                        ${payment}
+
+                    </span>
+
+                </div>
+
+                ${(Array.isArray(o.itens) ? o.itens : [])
+                .map(i => `
+
+                    <div class="row order-item">
+
+                        <div>
+
+                            <strong class="${
+                                i.status === 'cancelado'
+                                ? 'cancelled' : ''
+                            }">
+                                ${esc(i.nome)}
+                            </strong>
+
+                            <br>
+
+                            <span class="status ${esc(i.status)}">
+
+                                ${esc(
+                                    labels[i.status] ||
+                                    'Indisponível'
+                                )}
+
+                            </span>
+
+                        </div>
+
+                        <div style="text-align:right">
+
+                            ${money(
+                                i.status === 'cancelado'
+                                ? 0 : i.preco
+                            )}
+
+                            ${
+                                i.status === 'pendente' &&
+                                o.status_pagamento === 'aberto' &&
+                                i.id
+
+                                ? `<button
+                                    class="cancel-btn"
+                                    data-order="${esc(o.id)}"
+                                    data-item="${esc(i.id)}"
+                                >Cancelar</button>`
+
+                                : ''
+                            }
+
+                        </div>
+
+                    </div>
+
+                `).join('')}
+
+                <div class="row order-total">
+
+                    <span>Total do pedido</span>
+
+                    <span>${money(o.total)}</span>
+
+                </div>
+
+            </article>
+
+        `;
+
+    }).join('') ||
+
+    '<div class="empty">Você ainda não fez nenhum pedido nesta mesa.</div>';
+}
+
+/* CANCELAMENTO INDIVIDUAL */
+
+async function cancelItem(button) {
+
+    if (button.disabled) return;
+
+    if (!confirm('Deseja cancelar este produto?')) {
+        return;
+    }
+
+    button.disabled = true;
+
+    try {
+
+        const { error } = await sb.rpc(
+            'gerenciar_item',
+            {
+                p_pedido_id: Number(button.dataset.order),
+                p_item_id: button.dataset.item,
+                p_novo_status: 'cancelado',
+                p_motivo: null
+            }
+        );
+
+        if (error) throw error;
+
+        toast('Produto cancelado.');
+
+    } catch (e) {
+
+        toast(e.message || 'Não foi possível cancelar.');
+
+    } finally {
+
+        await loadOrders();
+
+        button.disabled = false;
+    }
+}
+
+/* EVENTOS DOS BOTÕES */
+
+document.addEventListener('click', e => {
+
+    const b = e.target.closest('button');
+
+    if (!b) return;
+
+    if (b.dataset.category) {
+
+        activeCategory = b.dataset.category;
+
+        document.querySelectorAll(
+            '.category'
+        ).forEach(el => {
+
+            el.classList.toggle(
+                'active',
+                el.dataset.category === activeCategory
+            );
+
+        });
+
+        renderProducts();
+    }
+
+    if (b.dataset.delta) {
+
+        changeQty(
+            b.dataset.id,
+            Number(b.dataset.delta)
+        );
+    }
+
+    if (b.dataset.item) {
+        cancelItem(b);
+    }
+});
+
+/* NAVEGAÇÃO INFERIOR */
+
+function showTab(tab) {
+
+    $('menuView').hidden = tab !== 'menu';
+
+    $('ordersView').hidden = tab !== 'orders';
+
+    $('menuTab').classList.toggle(
+        'active', tab === 'menu'
+    );
+
+    $('ordersTab').classList.toggle(
+        'active', tab === 'orders'
+    );
+
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+
+    if (tab === 'orders') {
+        loadOrders();
+    }
+}
+
+$('menuTab').onclick = () => showTab('menu');
+
+$('ordersTab').onclick = () => showTab('orders');
+
+/* CARREGAR PRODUTOS */
+
+async function loadProducts() {
+
+    const { data, error } = await sb
+        .from('produtos')
+        .select('id,nome,categoria,descricao,preco,imagem')
+        .eq('ativo', true)
+        .order('id');
+
+    if (error) throw error;
+
+    products = data || [];
+
+    for (const id of basket.keys()) {
+
+        if (!products.some(p => String(p.id) === id)) {
+            basket.delete(id);
+        }
+    }
+
+    renderCategories();
+
+    renderProducts();
+
+    renderCart();
+}
+
+/* CARREGAR PEDIDOS */
+
+async function loadOrders() {
+
+    if (!uid) return;
+
+    const n = ++seq;
+
+    const { data, error } = await sb
+        .from('pedidos')
+        .select('*')
+        .eq('usuario_id', uid)
+        .eq('mesa', mesa)
+        .order('created_at', { ascending: false });
+
+    if (n !== seq) return;
+
+    if (error) {
+
+        toast('Não foi possível atualizar os pedidos.');
+        return;
+    }
+
+    orders = data || [];
+
+    renderOrders();
+}
+
+/* INICIAR APLICAÇÃO */
+
+async function start() {
+
+    icons();
+
+    try {
+
+        if (!valid) {
+
+            throw new Error(
+                'Mesa inválida. Escaneie o QR Code correto.'
+            );
         }
 
-        function adicionarItem(nome, preco) {
-            carrinho.push({ nome: nome, preco: Number(preco) });
-            atualizarTotal();
-            
-            const aviso = document.createElement('div');
-            aviso.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-[#dfb18a] text-gray-900 text-xs px-4 py-2 rounded-full shadow-lg z-50 font-bold transition-opacity';
-            aviso.innerText = `+ 1 ${nome}`;
-            document.body.appendChild(aviso);
-            setTimeout(() => aviso.remove(), 1500);
+        const { data, error } =
+            await sb.auth.getSession();
+
+        if (error) throw error;
+
+        let session = data.session;
+
+        if (!session) {
+
+            const result =
+                await sb.auth.signInAnonymously();
+
+            if (result.error) throw result.error;
+
+            session = result.data.session;
         }
 
-        function atualizarTotal() {
-            let total = 0;
-            for (let i = 0; i < carrinho.length; i++) {
-                total += carrinho[i].preco;
-            }
-            document.getElementById('totalCarrinho').innerText = 'R$ ' + total.toFixed(2).replace('.', ',');
+        if (!session?.user?.is_anonymous) {
+
+            throw new Error('Sessão de cliente inválida.');
         }
 
-        async function enviarPedido() {
-            const nomeInput = document.getElementById('nomeCliente');
-            const nome = nomeInput.value.trim();
+        uid = session.user.id;
 
-            if (!nome) {
-                alert('Por favor, digite o seu nome antes de enviar.');
-                nomeInput.focus();
-                return;
-            }
-            if (carrinho.length === 0) {
-                alert('Seu carrinho está vazio! Escolha algum item.');
-                return;
-            }
+        await loadProducts();
 
-            let total = 0;
-            for (let i = 0; i < carrinho.length; i++) {
-                total += carrinho[i].preco;
-            }
+        ready = true;
 
-            const { data, error } = await sb
-                .from('pedidos')
-                .insert([
-                    { 
-                        mesa: `Mesa ${numeroMesa}`, 
-                        cliente: nome, 
-                        itens: carrinho, 
-                        total: total,
-                        status_cozinha: 'pendente',
-                        status_pagamento: 'aberto'
-                    }
-                ]);
+        renderCart();
 
-            if (error) {
-                alert('Erro ao enviar pedido: ' + error.message);
-            } else {
-                alert('Pedido enviado com sucesso para a cozinha! ☕');
-                carrinho = [];
-                atualizarTotal();
-                nomeInput.value = '';
-            }
+        notice('');
+
+        /* RECEBER ATUALIZAÇÕES EM TEMPO REAL */
+
+        sb.channel('amora-cliente-' + uid)
+
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'pedidos',
+                    filter: 'usuario_id=eq.' + uid
+                },
+                () => loadOrders()
+            )
+
+            .subscribe(status => {
+
+                if (status === 'SUBSCRIBED') {
+                    loadOrders();
+                }
+            });
+
+        await loadOrders();
+
+    } catch (e) {
+
+        notice(
+            'Não foi possível carregar o cardápio: ' +
+            e.message
+        );
+    }
+}
+
+/* RECUPERAR CONEXÃO */
+
+window.addEventListener('online', () => {
+
+    if (uid) {
+
+        loadOrders();
+
+        loadProducts().catch(e => toast(e.message));
+    }
+});
+
+document.addEventListener(
+    'visibilitychange',
+    () => {
+
+        if (!document.hidden && uid) {
+            loadOrders();
         }
-    </script>
+    }
+);
+
+start();
+
+</script>
+
 </body>
 </html>

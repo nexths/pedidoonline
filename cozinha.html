@@ -1,129 +1,945 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KDS - Painel da Cozinha</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cozinha | Bistrô Amora</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f5f3ed;
+    color: #30382c;
+    font: 15px 'DM Sans', sans-serif;
+}
+
+header {
+    background: #fffdf8;
+    border-bottom: 1px solid #e3e1d6;
+    padding: 22px 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+h1, h2, p {
+    margin: 0;
+}
+
+h1 {
+    font: 600 28px 'Playfair Display', serif;
+}
+
+small, .muted {
+    color: #777d70;
+}
+
+button, input {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: #596b47;
+    color: white;
+    font-weight: 600;
+    transition: .2s;
+}
+
+button:hover {
+    filter: brightness(.95);
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: default;
+}
+
+button.secondary {
+    background: #e9ecdf;
+    color: #48563b;
+}
+
+button.danger {
+    background: #f9e8e4;
+    color: #a43b32;
+}
+
+main {
+    max-width: 1500px;
+    margin: auto;
+    padding: 28px 5%;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 22px 0;
+}
+
+.stat, article, .login {
+    background: #fffdf8;
+    border: 1px solid #e3e1d6;
+    border-radius: 18px;
+    padding: 20px;
+}
+
+.stat strong {
+    display: block;
+    font-size: 30px;
+    margin-top: 6px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit, minmax(min(100%, 320px), 1fr)
+    );
+    gap: 16px;
+    align-items: start;
+}
+
+.orderhead {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 1px solid #e3e1d6;
+    padding-bottom: 14px;
+}
+
+.item {
+    padding: 14px 0;
+    border-bottom: 1px solid #eeeae0;
+}
+
+.item:last-child {
+    border: 0;
+    padding-bottom: 0;
+}
+
+.line, .actions, .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.line {
+    justify-content: space-between;
+}
+
+.actions {
+    margin-top: 10px;
+}
+
+.tag {
+    font-size: 12px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    background: #f4e8cb;
+    color: #805e21;
+}
+
+.tag.em_preparo {
+    background: #e2eaf5;
+    color: #345779;
+}
+
+.tag.pronto {
+    background: #e1ead8;
+    color: #44613c;
+}
+
+.tag.cancelado {
+    background: #f9e0db;
+    color: #a43b32;
+}
+
+.cancelado.item {
+    color: #a43b32;
+    background: #fff4f1;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 8px;
+}
+
+.cancelado .name {
+    text-decoration: line-through;
+}
+
+.login {
+    max-width: 420px;
+    margin: 8vh auto;
+}
+
+.login input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #d8d8ca;
+    border-radius: 9px;
+    margin: 8px 0 16px;
+    background: white;
+}
+
+.login button {
+    width: 100%;
+}
+
+#notice {
+    padding: 12px 5%;
+    background: #ede6cf;
+    color: #735b28;
+}
+
+#notice:empty {
+    display: none;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.empty {
+    padding: 40px;
+    text-align: center;
+    color: #777d70;
+}
+
+.brand {
+    letter-spacing: 3px;
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #788364;
+}
+
+footer {
+    padding: 24px;
+    text-align: center;
+    color: #818577;
+    font-size: 12px;
+}
+
+@media(max-width: 500px) {
+    .stat {
+        padding: 12px;
+    }
+
+    .stat strong {
+        font-size: 24px;
+    }
+
+    .stat small {
+        font-size: 11px;
+    }
+
+    main {
+        padding: 18px 4%;
+    }
+}
+</style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen p-6">
-    <!-- Header da Cozinha -->
-    <header class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
-        <div>
-            <h1 class="text-2xl font-black text-red-500 tracking-wide">🔥 KDS - Painel da Cozinha</h1>
-            <p class="text-xs text-gray-400 mt-0.5">Gerenciamento de preparo em tempo real</p>
+
+<body>
+
+<header>
+    <div>
+        <div class="brand">Bistrô Amora</div>
+        <h1>Painel da cozinha</h1>
+        <small id="connection">Aguardando login</small>
+    </div>
+
+    <div class="toolbar" id="tools" hidden>
+        <button class="secondary" id="sound">
+            Ativar som
+        </button>
+
+        <button class="secondary" id="refresh">
+            Atualizar
+        </button>
+
+        <button class="secondary" id="logout">
+            Sair
+        </button>
+    </div>
+</header>
+
+<div id="notice" role="status"></div>
+
+<main>
+
+    <form class="login" id="login">
+
+        <h2>Acesso da cozinha</h2>
+        <p class="muted">Entre com a conta da equipe.</p>
+
+        <br>
+
+        <label>
+            E-mail
+            <input id="email"
+                   type="email"
+                   required
+                   autocomplete="username">
+        </label>
+
+        <label>
+            Senha
+            <input id="password"
+                   type="password"
+                   required
+                   autocomplete="current-password">
+        </label>
+
+        <button type="submit">Entrar</button>
+
+    </form>
+
+    <section id="panel" hidden>
+
+        <h2>Pedidos da cozinha</h2>
+
+        <p class="muted">
+            Acompanhe e atualize cada produto individualmente.
+        </p>
+
+        <div class="stats">
+
+            <div class="stat">
+                <small>Itens pendentes</small>
+                <strong id="pending">0</strong>
+            </div>
+
+            <div class="stat">
+                <small>Em preparo</small>
+                <strong id="preparing">0</strong>
+            </div>
+
+            <div class="stat">
+                <small>Prontos</small>
+                <strong id="ready">0</strong>
+            </div>
+
         </div>
-        <div class="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-full">
-            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse" id="dotStatus"></span>
-            <span id="statusConexao" class="text-xs font-semibold text-yellow-400">Conectando...</span>
+
+        <div class="toolbar" style="margin-bottom:16px">
+
+            <button id="active">
+                Em andamento
+            </button>
+
+            <button class="secondary" id="all">
+                Todos em aberto / cancelados
+            </button>
+
         </div>
-    </header>
 
-    <!-- Grid de Pedidos Pendentes de Preparo -->
-    <div id="listaPedidos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        <div id="orders" class="grid"></div>
 
-    <script>
-        const supabaseUrl = 'https://lcwmwyreawzjrggnbpcz.supabase.co';
-        const supabaseKey = 'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4';
-        const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+    </section>
 
-        async function carregarPedidosPendentes() {
-            const { data, error } = await sb
-                .from('pedidos')
-                .select('*')
-                .eq('status_cozinha', 'pendente')
-                .order('created_at', { ascending: true });
+</main>
 
-            if (!error && data) {
-                renderizarPedidos(data);
+<footer>
+    Bistrô Amora · Gestão de pedidos
+</footer>
+
+<script>
+
+const sb = supabase.createClient(
+    'https://lcwmwyreawzjrggnbpcz.supabase.co',
+    'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4',
+    {
+        auth: {
+            storageKey: 'amora-cozinha-auth'
+        }
+    }
+);
+
+const $ = id => document.getElementById(id);
+
+let rows = [];
+let channel = null;
+let user = null;
+let all = false;
+let context = null;
+let version = 0;
+let busy = new Set();
+
+const labels = {
+    pendente: 'Pendente',
+    em_preparo: 'Em preparo',
+    pronto: 'Pronto',
+    cancelado: 'Cancelado'
+};
+
+/* ELEMENTOS DA INTERFACE */
+
+function node(tag, text, cls) {
+
+    const e = document.createElement(tag);
+
+    if (text !== undefined) {
+        e.textContent = text;
+    }
+
+    if (cls) {
+        e.className = cls;
+    }
+
+    return e;
+}
+
+function notice(t = '') {
+    $('notice').textContent = t;
+}
+
+/* ALERTAS SONOROS */
+
+function beep(cancel = false) {
+
+    if (!context || context.state !== 'running') {
+        return;
+    }
+
+    for (let i = 0; i < (cancel ? 3 : 2); i++) {
+
+        const o = context.createOscillator();
+        const g = context.createGain();
+        const t = context.currentTime + i * .22;
+
+        o.frequency.value = cancel ? 420 : 780;
+
+        g.gain.setValueAtTime(.09, t);
+
+        g.gain.exponentialRampToValueAtTime(
+            .001, t + .16
+        );
+
+        o.connect(g);
+        g.connect(context.destination);
+
+        o.start(t);
+        o.stop(t + .18);
+    }
+}
+
+$('sound').onclick = async () => {
+
+    try {
+
+        context ||= new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
+
+        await context.resume();
+
+        beep();
+
+        $('sound').textContent = 'Som ativado';
+
+    } catch (e) {
+
+        notice('Não foi possível ativar o áudio.');
+
+    }
+};
+
+/* PRODUTOS DO PEDIDO */
+
+function items(o) {
+    return Array.isArray(o.itens) ? o.itens : [];
+}
+
+/* RENDERIZAR OS PEDIDOS */
+
+function render() {
+
+    const root = $('orders');
+
+    root.replaceChildren();
+
+    const open = rows.filter(
+        o => o.status_pagamento === 'aberto'
+    );
+
+    for (const [id, status] of [
+        ['pending', 'pendente'],
+        ['preparing', 'em_preparo'],
+        ['ready', 'pronto']
+    ]) {
+
+        $(id).textContent = open
+            .flatMap(items)
+            .filter(i => i.status === status)
+            .length;
+    }
+
+    const list = rows.filter(o =>
+        all ||
+        o.status_pagamento === 'cancelado' ||
+        items(o).some(i =>
+            ['pendente', 'em_preparo'].includes(i.status)
+        )
+    );
+
+    if (!list.length) {
+
+        root.append(
+            node(
+                'div',
+                'Nenhum pedido nesta visualização.',
+                'empty'
+            )
+        );
+
+        return;
+    }
+
+    for (const o of list) {
+
+        const card = node('article');
+
+        const head = node(
+            'div', undefined, 'orderhead'
+        );
+
+        const left = node('div');
+
+        left.append(
+            node('h2', o.mesa),
+            node(
+                'small',
+                o.cliente + ' · Pedido #' + o.id
+            )
+        );
+
+        head.append(
+            left,
+            node(
+                'small',
+                new Date(o.created_at)
+                    .toLocaleTimeString('pt-BR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+            )
+        );
+
+        card.append(head);
+
+        for (const i of items(o)) {
+
+            const s = i.status || 'legado';
+
+            const line = node(
+                'div', undefined, 'item ' + s
+            );
+
+            const top = node(
+                'div', undefined, 'line'
+            );
+
+            top.append(
+                node('strong', i.nome, 'name'),
+                node(
+                    'span',
+                    labels[s] || 'Pedido antigo',
+                    'tag ' + s
+                )
+            );
+
+            line.append(top);
+
+            if (s === 'cancelado') {
+
+                line.append(
+                    node(
+                        'small',
+                        'Cancelado por ' +
+                        (i.cancelado_por || '—') +
+                        (
+                            i.motivo_cancelamento
+                            ? ' · ' + i.motivo_cancelamento
+                            : ''
+                        )
+                    )
+                );
             }
+
+            if (
+                o.status_pagamento === 'aberto' &&
+                i.id &&
+                ['pendente', 'em_preparo'].includes(s)
+            ) {
+
+                const a = node(
+                    'div', undefined, 'actions'
+                );
+
+                const buttons = [
+                    [
+                        s === 'pendente'
+                        ? 'Iniciar preparo'
+                        : 'Marcar pronto',
+
+                        s === 'pendente'
+                        ? 'em_preparo'
+                        : 'pronto',
+
+                        ''
+                    ],
+                    [
+                        'Cancelar',
+                        'cancelado',
+                        'danger'
+                    ]
+                ];
+
+                for (const [label, next, cls] of buttons) {
+
+                    const b = node(
+                        'button', label, cls
+                    );
+
+                    b.disabled = busy.has(
+                        o.id + ':' + i.id
+                    );
+
+                    b.onclick = () => change(o, i, next);
+
+                    a.append(b);
+                }
+
+                line.append(a);
+            }
+
+            card.append(line);
         }
 
-        function renderizarPedidos(pedidos) {
-            const container = document.getElementById('listaPedidos');
-            container.innerHTML = '';
+        root.append(card);
+    }
+}
 
-            if (pedidos.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-20">
-                        <p class="text-gray-500 text-base font-medium">Nenhum pedido pendente na cozinha no momento. Tudo limpo! 👨‍🍳</p>
-                    </div>`;
-                return;
+/* ALTERAR STATUS COM SEGURANÇA */
+
+async function change(o, i, s) {
+
+    let reason = null;
+
+    if (s === 'cancelado') {
+
+        reason = prompt(
+            'Motivo do cancelamento (opcional):',
+            ''
+        );
+
+        if (reason === null) {
+            return;
+        }
+    }
+
+    const key = o.id + ':' + i.id;
+
+    busy.add(key);
+
+    render();
+
+    try {
+
+        const { error } = await sb.rpc(
+            'gerenciar_item',
+            {
+                p_pedido_id: o.id,
+                p_item_id: i.id,
+                p_novo_status: s,
+                p_motivo: reason || null
             }
+        );
 
-            pedidos.forEach(pedido => {
-                let itensHtml = pedido.itens.map(i => `
-                    <li class="flex justify-between text-sm py-1 border-b border-gray-800/60 last:border-0">
-                        <span class="font-medium text-gray-200">• ${i.nome}</span>
-                        <span class="text-gray-400 text-xs">R$ ${Number(i.preco).toFixed(2).replace('.', ',')}</span>
-                    </li>
-                `).join('');
-                
-                let card = document.createElement('div');
-                card.className = 'bg-gray-900 border border-red-500/40 rounded-2xl p-5 shadow-xl flex flex-col justify-between hover:border-red-500 transition';
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="bg-red-600 text-white px-3 py-1 rounded-lg font-black text-xs tracking-wider shadow-sm">${pedido.mesa}</span>
-                            <span class="text-xs text-gray-400 font-mono bg-gray-800 px-2 py-1 rounded">🕒 ${new Date(pedido.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-                        </div>
-                        <h3 class="font-bold text-xl text-white mb-3 border-b border-gray-800 pb-2">${pedido.cliente}</h3>
-                        <ul class="space-y-1 mb-5">${itensHtml}</ul>
-                    </div>
-                    <div>
-                        <button onclick="marcarPronto(${pedido.id})" class="w-full bg-green-600 hover:bg-green-700 active:scale-98 text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
-                            <span>Marcar como Pronto</span> ✅
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
+        if (error) {
+            throw error;
+        }
+
+        notice('Produto atualizado.');
+
+    } catch (e) {
+
+        notice(
+            e.message || 'Falha ao atualizar produto.'
+        );
+
+    } finally {
+
+        busy.delete(key);
+
+        await load();
+
+        render();
+    }
+}
+
+/* CARREGAR PEDIDOS */
+
+async function load() {
+
+    if (!user) {
+        return;
+    }
+
+    const v = ++version;
+
+    const { data, error } = await sb
+        .from('pedidos')
+        .select(
+            'id,mesa,cliente,itens,total,' +
+            'status_cozinha,status_pagamento,created_at'
+        )
+        .in(
+            'status_pagamento',
+            ['aberto', 'cancelado']
+        )
+        .order(
+            'created_at',
+            { ascending: true }
+        );
+
+    if (v !== version || !user) {
+        return;
+    }
+
+    if (error) {
+
+        notice(
+            'Erro ao carregar pedidos: ' +
+            error.message
+        );
+
+        return;
+    }
+
+    rows = data || [];
+
+    render();
+}
+
+/* AUTENTICAÇÃO E REALTIME */
+
+async function start(session) {
+
+    if (
+        !session ||
+        session.user.app_metadata?.funcao !== 'cozinha' ||
+        session.user.is_anonymous
+    ) {
+
+        if (session) {
+            await sb.auth.signOut();
+        }
+
+        notice(
+            session ? 'Conta sem acesso à cozinha.' : ''
+        );
+
+        return;
+    }
+
+    user = session.user;
+
+    $('login').hidden = true;
+    $('panel').hidden = false;
+    $('tools').hidden = false;
+
+    $('connection').textContent = 'Conectando…';
+
+    if (channel) {
+        await sb.removeChannel(channel);
+    }
+
+    channel = sb
+        .channel('amora-cozinha')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'pedidos'
+            },
+
+            p => {
+
+                if (p.eventType === 'INSERT') {
+
+                    beep();
+
+                    notice(
+                        'Novo pedido: ' +
+                        (p.new.mesa || '')
+                    );
+                }
+
+                if (p.eventType === 'UPDATE') {
+
+                    const previous = rows.find(
+                        o => o.id === p.new.id
+                    );
+
+                    if (
+                        previous &&
+                        items(p.new).some(i =>
+                            i.status === 'cancelado' &&
+                            !items(previous).some(j =>
+                                j.id === i.id &&
+                                j.status === 'cancelado'
+                            )
+                        )
+                    ) {
+
+                        beep(true);
+
+                        notice(
+                            'Produto cancelado: ' +
+                            p.new.mesa
+                        );
+                    }
+                }
+
+                load();
+            }
+        )
+        .subscribe(status => {
+
+            $('connection').textContent =
+                status === 'SUBSCRIBED'
+                ? '● Conectado em tempo real'
+                : 'Conexão: ' + status;
+
+            if (status === 'SUBSCRIBED') {
+                load();
+            }
+        });
+
+    await load();
+}
+
+/* LOGIN */
+
+$('login').onsubmit = async e => {
+
+    e.preventDefault();
+
+    const b = e.currentTarget.querySelector('button');
+
+    b.disabled = true;
+
+    try {
+
+        const { data, error } =
+            await sb.auth.signInWithPassword({
+
+                email: $('email').value.trim(),
+
+                password: $('password').value
+
             });
+
+        if (error) {
+            throw error;
         }
 
-        async function marcarPronto(id) {
-            // Atualiza apenas o status da cozinha para 'pronto' (some da cozinha, fica no caixa)
-            const { error } = await sb
-                .from('pedidos')
-                .update({ status_cozinha: 'pronto' })
-                .eq('id', id);
-            
-            if (!error) {
-                carregarPedidosPendentes();
-            }
+        $('password').value = '';
+
+        await start(data.session);
+
+    } catch (e) {
+
+        notice(e.message);
+
+    } finally {
+
+        b.disabled = false;
+    }
+};
+
+/* SAIR */
+
+$('logout').onclick = async () => {
+
+    user = null;
+
+    version++;
+
+    if (channel) {
+        await sb.removeChannel(channel);
+    }
+
+    await sb.auth.signOut();
+
+    location.reload();
+};
+
+/* FILTROS */
+
+$('refresh').onclick = load;
+
+$('active').onclick = () => {
+
+    all = false;
+
+    $('active').className = '';
+
+    $('all').className = 'secondary';
+
+    render();
+};
+
+$('all').onclick = () => {
+
+    all = true;
+
+    $('all').className = '';
+
+    $('active').className = 'secondary';
+
+    render();
+};
+
+/* RECUPERAR CONEXÃO */
+
+window.addEventListener('online', load);
+
+document.addEventListener(
+    'visibilitychange',
+    () => {
+
+        if (!document.hidden) {
+            load();
         }
+    }
+);
 
-        sb.channel('public:pedidos-cozinha')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, () => {
-              carregarPedidosPendentes();
-              tocarAlertaSonoro();
-          })
-          .subscribe((status) => {
-              if (status === 'SUBSCRIBED') {
-                  const lbl = document.getElementById('statusConexao');
-                  const dot = document.getElementById('dotStatus');
-                  lbl.innerText = 'Ao vivo (Conectado)';
-                  lbl.className = 'text-xs font-semibold text-green-400';
-                  dot.className = 'w-2.5 h-2.5 rounded-full bg-green-500';
-              }
-          });
+/* RECUPERAR SESSÃO */
 
-        function tocarAlertaSonoro() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = 587.33;
-                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.2);
-            } catch(e) {}
-        }
+sb.auth.getSession()
+    .then(({ data }) => start(data.session))
+    .catch(e => notice(e.message));
 
-        carregarPedidosPendentes();
-    </script>
+</script>
+
 </body>
 </html>

@@ -1,148 +1,1355 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDV / Caixa - Gestão de Mesas e Contas</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caixa | Bistrô Amora</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+    --verde: #596b47;
+    --fundo: #f5f3ed;
+    --card: #fffdf8;
+    --texto: #30382c;
+    --borda: #e3e1d6;
+    --suave: #777d70;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--texto);
+    font: 15px 'DM Sans', sans-serif;
+}
+
+h1, h2, h3, p {
+    margin: 0;
+}
+
+h1 {
+    font: 600 29px 'Playfair Display', serif;
+}
+
+button, input {
+    font: inherit;
+}
+
+button {
+    border: 0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    background: var(--verde);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+button:hover {
+    filter: brightness(.94);
+}
+
+button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+button.secondary {
+    background: #e9ecdf;
+    color: #48563b;
+}
+
+button.danger {
+    background: #fae8e4;
+    color: #a43b32;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 22px 5%;
+    background: var(--card);
+    border-bottom: 1px solid var(--borda);
+}
+
+.brand {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #788364;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.muted, small {
+    color: var(--suave);
+}
+
+.toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+main {
+    max-width: 1500px;
+    margin: auto;
+    padding: 28px 5%;
+}
+
+.login {
+    max-width: 420px;
+    margin: 8vh auto;
+    padding: 30px;
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: 20px;
+}
+
+.login h2 {
+    margin-bottom: 6px;
+}
+
+.login input {
+    margin: 8px 0 18px;
+    width: 100%;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 13px;
+    background: white;
+}
+
+.login button {
+    width: 100%;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 25px 0;
+}
+
+.stat {
+    background: var(--card);
+    border: 1px solid var(--borda);
+    border-radius: 18px;
+    padding: 22px;
+}
+
+.stat strong {
+    display: block;
+    font-size: clamp(18px, 3vw, 30px);
+    margin-top: 9px;
+}
+
+.stat.highlight {
+    background: var(--verde);
+    color: white;
+    border-color: var(--verde);
+}
+
+.highlight small {
+    color: #e1e8d9;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(min(100%, 300px), 1fr)
+    );
+    gap: 16px;
+    align-items: start;
+}
+
+.mesa {
+    padding: 22px;
+    border: 1px solid var(--borda);
+    background: var(--card);
+    border-radius: 18px;
+    box-shadow: 0 5px 15px #30382c05;
+}
+
+.mesa h2 {
+    font: 600 26px 'Playfair Display', serif;
+}
+
+.flex {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 5px 10px;
+    border-radius: 30px;
+    background: #f3e8cc;
+    color: #896628;
+    font-weight: 600;
+}
+
+.tag.pronto {
+    background: #e2ecd9;
+    color: #48643c;
+}
+
+.tag.em_preparo {
+    background: #e0eaf5;
+    color: #395d80;
+}
+
+.tag.cancelado {
+    background: #f9e0db;
+    color: #a43b32;
+}
+
+.total {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 20px 0 4px;
+    color: var(--verde);
+}
+
+.mesa button {
+    width: 100%;
+    margin-top: 18px;
+}
+
+.info {
+    padding: 9px 0;
+    color: var(--suave);
+    font-size: 13px;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: #23291f70;
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal {
+    background: var(--card);
+    border-radius: 22px;
+    padding: 24px;
+    width: 100%;
+    max-width: 650px;
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+.modal h2 {
+    font: 600 28px 'Playfair Display', serif;
+}
+
+.close {
+    background: #eceee5;
+    color: var(--texto);
+}
+
+.pedido {
+    margin-top: 18px;
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.pedido-header {
+    background: #eeefe6;
+    padding: 14px;
+}
+
+.item {
+    padding: 14px;
+    border-bottom: 1px solid var(--borda);
+}
+
+.item:last-child {
+    border-bottom: 0;
+}
+
+.item.cancelado {
+    color: #a43b32;
+    background: #fff4f1;
+}
+
+.item.cancelado .nome {
+    text-decoration: line-through;
+}
+
+.item button {
+    padding: 6px 10px;
+    font-size: 11px;
+}
+
+.item-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.summary {
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid var(--borda);
+}
+
+.summary strong {
+    font-size: 27px;
+    color: var(--verde);
+}
+
+.full {
+    width: 100%;
+    margin-top: 12px;
+}
+
+#notice {
+    padding: 14px 5%;
+    background: #e5ebd9;
+    color: #45573a;
+    white-space: pre-wrap;
+}
+
+#notice.error {
+    color: #a43b32;
+    background: #f9e0db;
+}
+
+#notice:empty {
+    display: none;
+}
+
+.empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--suave);
+}
+
+[hidden] {
+    display: none !important;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: var(--suave);
+    font-size: 12px;
+}
+
+@media(max-width: 550px) {
+
+    main {
+        padding: 20px 4%;
+    }
+
+    .stats {
+        gap: 7px;
+    }
+
+    .stat {
+        padding: 12px 9px;
+    }
+
+    .stat small {
+        font-size: 10px;
+    }
+
+    .modal {
+        padding: 18px;
+    }
+
+    header {
+        padding: 18px 4%;
+    }
+}
+
+</style>
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen p-6">
-    <!-- Header do Caixa -->
-    <header class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
-        <div>
-            <h1 class="text-2xl font-black text-emerald-400 tracking-wide">💵 PDV & Caixa - Fechamento de Mesas</h1>
-            <p class="text-xs text-gray-400 mt-0.5">Acompanhamento financeiro e consumo acumulado por mesa</p>
+
+<body>
+
+<header>
+    <div>
+        <div class="brand">Bistrô Amora</div>
+        <h1>Controle de caixa</h1>
+        <small id="connection">Aguardando login</small>
+    </div>
+
+    <div id="tools" class="toolbar" hidden>
+
+        <button class="secondary" id="refresh">
+            Atualizar
+        </button>
+
+        <button class="secondary" id="logout">
+            Sair
+        </button>
+
+    </div>
+</header>
+
+<div id="notice" role="status"></div>
+
+<main>
+
+    <form class="login" id="login">
+
+        <h2>Acesso do caixa</h2>
+
+        <p class="muted">
+            Entre com sua conta de funcionário.
+        </p>
+
+        <br>
+
+        <label>
+            E-mail
+            <input
+                id="email"
+                type="email"
+                autocomplete="username"
+                required
+            >
+        </label>
+
+        <label>
+            Senha
+            <input
+                id="password"
+                type="password"
+                autocomplete="current-password"
+                required
+            >
+        </label>
+
+        <button type="submit">Entrar</button>
+
+    </form>
+
+    <section id="panel" hidden>
+
+        <h2>Visão geral</h2>
+
+        <p class="muted">
+            Acompanhe as contas e o consumo das mesas.
+        </p>
+
+        <div class="stats">
+
+            <div class="stat">
+                <small>Mesas em aberto</small>
+                <strong id="countMesas">0</strong>
+            </div>
+
+            <div class="stat">
+                <small>Total em aberto</small>
+                <strong id="totalAberto">R$ 0,00</strong>
+            </div>
+
+            <div class="stat highlight">
+                <small>Recebido hoje</small>
+                <strong id="totalPago">—</strong>
+            </div>
+
         </div>
-        <div class="flex items-center gap-2 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-full">
-            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-pulse" id="dotStatus"></span>
-            <span id="statusConexao" class="text-xs font-semibold text-yellow-400">Conectando...</span>
+
+        <div class="toolbar" style="margin-bottom:20px">
+
+            <button id="openTab">
+                Mesas abertas
+            </button>
+
+            <button id="paidTab" class="secondary">
+                Histórico de pagamentos
+            </button>
+
         </div>
-    </header>
 
-    <!-- Grid de Mesas Abertas -->
-    <div id="listaCaixa" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        <div id="mesas" class="grid"></div>
 
-    <script>
-        const supabaseUrl = 'https://lcwmwyreawzjrggnbpcz.supabase.co';
-        const supabaseKey = 'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4';
-        const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+    </section>
 
-        async function carregarMesasAbertas() {
-            // Busca apenas os pedidos que ainda estão com pagamento em aberto
+</main>
+
+<div id="overlay" class="overlay" hidden>
+
+    <section class="modal" role="dialog" aria-modal="true">
+
+        <div class="flex">
+
+            <div>
+                <div class="brand">Detalhes da conta</div>
+                <h2 id="mesaTitulo"></h2>
+            </div>
+
+            <button class="close" id="closeModal">
+                Fechar
+            </button>
+
+        </div>
+
+        <div id="detalhes"></div>
+
+        <div class="summary">
+
+            <div class="flex">
+                <span>Total da conta</span>
+                <strong id="modalTotal">R$ 0,00</strong>
+            </div>
+
+            <p id="paymentHint"
+               class="muted"
+               style="margin-top:10px;font-size:12px">
+            </p>
+
+            <button class="full" id="pay">
+                Confirmar pagamento
+            </button>
+
+            <p id="modalNotice"
+               role="status"
+               style="margin-top:12px;font-size:13px">
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+<footer>
+    Bistrô Amora · Gestão de pedidos e atendimento
+</footer>
+
+<script>
+
+const sb = supabase.createClient(
+    'https://lcwmwyreawzjrggnbpcz.supabase.co',
+    'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4',
+    {
+        auth: {
+            storageKey: 'amora-caixa-auth'
+        }
+    }
+);
+
+const $ = id => document.getElementById(id);
+
+const money = value =>
+    Number(value || 0).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+
+const labels = {
+    pendente: 'Pendente',
+    em_preparo: 'Em preparo',
+    pronto: 'Pronto',
+    cancelado: 'Cancelado'
+};
+
+let user = null;
+let channel = null;
+let pedidos = [];
+let selectedMesa = null;
+let tab = 'aberto';
+let version = 0;
+let busy = false;
+
+/* FUNÇÕES AUXILIARES */
+
+function node(tag, text, cls) {
+
+    const el = document.createElement(tag);
+
+    if (text !== undefined) {
+        el.textContent = text;
+    }
+
+    if (cls) {
+        el.className = cls;
+    }
+
+    return el;
+}
+
+function notice(text = '', error = false) {
+
+    $('notice').textContent = text;
+    $('notice').className = error ? 'error' : '';
+
+    if (!$('overlay').hidden) {
+        $('modalNotice').textContent = text;
+        $('modalNotice').style.color =
+            error ? '#a43b32' : '#596b47';
+    }
+}
+
+function items(p) {
+    return Array.isArray(p.itens) ? p.itens : [];
+}
+
+function total(list) {
+    return list.reduce(
+        (sum, p) => sum + Number(p.total || 0),
+        0
+    );
+}
+
+function openOrders() {
+    return pedidos.filter(
+        p => p.status_pagamento === 'aberto'
+    );
+}
+
+function grouped(list) {
+
+    const map = new Map();
+
+    for (const p of list) {
+
+        if (!map.has(p.mesa)) {
+            map.set(p.mesa, []);
+        }
+
+        map.get(p.mesa).push(p);
+    }
+
+    return [...map.entries()].sort(
+        (a, b) => a[0].localeCompare(
+            b[0], 'pt-BR', { numeric: true }
+        )
+    );
+}
+
+/* RENDERIZAR O CAIXA */
+
+function render() {
+
+    const abertas = openOrders();
+
+    $('countMesas').textContent =
+        grouped(abertas).length;
+
+    $('totalAberto').textContent =
+        money(total(abertas));
+
+    // O banco ainda não registra o horário do pagamento.
+    // Não usar created_at para fingir um faturamento diário.
+
+    $('totalPago').textContent = '—';
+
+    $('totalPago').title =
+        'Disponível após cadastrar a data de pagamento.';
+
+    const root = $('mesas');
+
+    root.replaceChildren();
+
+    if (tab === 'pago') {
+
+        renderHistory(root);
+
+    } else {
+
+        const groups = grouped(abertas);
+
+        if (!groups.length) {
+
+            root.append(
+                node(
+                    'div',
+                    'Nenhuma mesa com conta em aberto.',
+                    'empty'
+                )
+            );
+        }
+
+        for (const [mesa, list] of groups) {
+
+            const card = node('article', undefined, 'mesa');
+
+            const head = node('div', undefined, 'flex');
+
+            const ready = list.every(
+                p => p.status_cozinha === 'pronto'
+            );
+
+            head.append(
+                node('h2', mesa),
+                node(
+                    'span',
+                    ready ? 'Pronta para fechar' : 'Em atendimento',
+                    'tag ' + (ready ? 'pronto' : '')
+                )
+            );
+
+            const quantidade = list
+                .flatMap(items)
+                .filter(i => i.status !== 'cancelado')
+                .length;
+
+            const btn = node('button', 'Visualizar conta');
+
+            btn.onclick = () => openMesa(mesa);
+
+            card.append(
+                head,
+                node('div', money(total(list)), 'total'),
+                node(
+                    'small',
+                    list.length + ' pedido(s) · ' +
+                    quantidade + ' produto(s)'
+                ),
+                btn
+            );
+
+            root.append(card);
+        }
+    }
+
+    if (selectedMesa !== null) {
+        renderModal();
+    }
+}
+
+/* HISTÓRICO */
+
+function renderHistory(root) {
+
+    const pagos = pedidos
+        .filter(p => p.status_pagamento === 'pago')
+        .slice()
+        .reverse();
+
+    if (!pagos.length) {
+
+        root.append(
+            node('div', 'Nenhum pagamento encontrado.', 'empty')
+        );
+
+        return;
+    }
+
+    for (const p of pagos) {
+
+        const card = node('article', undefined, 'mesa');
+
+        const head = node('div', undefined, 'flex');
+
+        head.append(
+            node('h2', p.mesa),
+            node('span', 'Pago', 'tag pronto')
+        );
+
+        card.append(
+            head,
+            node('div', money(p.total), 'total'),
+            node(
+                'p',
+                p.cliente + ' · Pedido #' + p.id,
+                'info'
+            ),
+            node(
+                'small',
+                'Pedido realizado em ' +
+                new Date(p.created_at).toLocaleString('pt-BR')
+            )
+        );
+
+        root.append(card);
+    }
+}
+
+/* ABRIR CONTA */
+
+function openMesa(mesa) {
+
+    selectedMesa = mesa;
+
+    $('overlay').hidden = false;
+    $('modalNotice').textContent = '';
+
+    document.body.style.overflow = 'hidden';
+
+    renderModal();
+}
+
+function closeMesa() {
+
+    selectedMesa = null;
+
+    $('overlay').hidden = true;
+
+    document.body.style.overflow = '';
+}
+
+$('closeModal').onclick = closeMesa;
+
+$('overlay').onclick = e => {
+
+    if (e.target === $('overlay')) {
+        closeMesa();
+    }
+};
+
+document.addEventListener('keydown', e => {
+
+    if (e.key === 'Escape') {
+        closeMesa();
+    }
+});
+
+/* DETALHES DOS PEDIDOS */
+
+function renderModal() {
+
+    const list = pedidos.filter(
+        p =>
+            p.mesa === selectedMesa &&
+            p.status_pagamento === 'aberto'
+    );
+
+    // Mostra também produtos cancelados integralmente
+    // durante o período da conta aberta.
+
+    const firstDate = list.length
+        ? Math.min(
+            ...list.map(p => new Date(p.created_at).getTime())
+        )
+        : Infinity;
+
+    const cancelled = pedidos.filter(
+        p =>
+            p.mesa === selectedMesa &&
+            p.status_pagamento === 'cancelado' &&
+            new Date(p.created_at).getTime() >= firstDate
+    );
+
+    $('mesaTitulo').textContent = selectedMesa;
+
+    const root = $('detalhes');
+
+    root.replaceChildren();
+
+    for (const p of [...list, ...cancelled]) {
+
+        const card = node('div', undefined, 'pedido');
+
+        const head = node(
+            'div',
+            undefined,
+            'pedido-header'
+        );
+
+        head.append(
+            node('strong', p.cliente),
+            node(
+                'p',
+                'Pedido #' + p.id + ' · ' +
+                new Date(p.created_at).toLocaleTimeString(
+                    'pt-BR',
+                    { hour: '2-digit', minute: '2-digit' }
+                ),
+                'muted'
+            )
+        );
+
+        card.append(head);
+
+        for (const i of items(p)) {
+
+            const status = i.status || 'legado';
+
+            const item = node(
+                'div',
+                undefined,
+                'item ' + status
+            );
+
+            const line = node('div', undefined, 'flex');
+
+            line.append(
+                node('strong', i.nome, 'nome'),
+                node(
+                    'strong',
+                    money(status === 'cancelado' ? 0 : i.preco)
+                )
+            );
+
+            item.append(line);
+
+            const bottom = node(
+                'div',
+                undefined,
+                'item-bottom'
+            );
+
+            bottom.append(
+                node(
+                    'span',
+                    labels[status] || 'Pedido antigo',
+                    'tag ' + status
+                )
+            );
+
+            if (
+                p.status_pagamento === 'aberto' &&
+                i.id &&
+                ['pendente', 'em_preparo'].includes(status)
+            ) {
+
+                const btn = node(
+                    'button',
+                    'Cancelar produto',
+                    'danger'
+                );
+
+                btn.disabled = busy;
+
+                btn.onclick = () => cancelar(p, i);
+
+                bottom.append(btn);
+            }
+
+            item.append(bottom);
+
+            if (status === 'cancelado') {
+
+                item.append(
+                    node(
+                        'small',
+                        'Cancelado por ' +
+                        (i.cancelado_por || '—') +
+                        (
+                            i.motivo_cancelamento
+                            ? ' · ' + i.motivo_cancelamento
+                            : ''
+                        )
+                    )
+                );
+            }
+
+            card.append(item);
+        }
+
+        root.append(card);
+    }
+
+    if (!list.length) {
+
+        root.append(
+            node('div', 'Esta conta não está mais aberta.', 'empty')
+        );
+    }
+
+    $('modalTotal').textContent = money(total(list));
+
+    const ready = list.length > 0 &&
+        list.every(p => p.status_cozinha === 'pronto');
+
+    $('pay').disabled = busy || !ready;
+
+    $('paymentHint').textContent = ready
+        ? 'Confirme somente após receber o pagamento.'
+        : 'O fechamento será liberado quando todos os pedidos estiverem prontos.';
+}
+
+/* CANCELAMENTO INDIVIDUAL */
+
+async function cancelar(p, i) {
+
+    if (busy) return;
+
+    const reason = prompt(
+        'Motivo do cancelamento de ' + i.nome + ':',
+        ''
+    );
+
+    if (reason === null) return;
+
+    if (!confirm('Confirma o cancelamento deste produto?')) {
+        return;
+    }
+
+    busy = true;
+
+    renderModal();
+
+    try {
+
+        const { error } = await sb.rpc(
+            'gerenciar_item',
+            {
+                p_pedido_id: p.id,
+                p_item_id: i.id,
+                p_novo_status: 'cancelado',
+                p_motivo: reason.trim() || null
+            }
+        );
+
+        if (error) throw error;
+
+        notice('Produto cancelado. Conta recalculada.');
+
+    } catch (e) {
+
+        notice(
+            e.message || 'Erro ao cancelar produto.',
+            true
+        );
+
+    } finally {
+
+        busy = false;
+
+        await load();
+
+        render();
+    }
+}
+
+/* FECHAMENTO DE CONTA */
+
+$('pay').onclick = async () => {
+
+    if (busy || !selectedMesa) return;
+
+    const mesa = selectedMesa;
+
+    const list = openOrders().filter(
+        p => p.mesa === mesa
+    );
+
+    if (!list.length) return;
+
+    if (!list.every(
+        p => p.status_cozinha === 'pronto'
+    )) {
+
+        notice('Ainda existem pedidos em preparo.', true);
+        return;
+    }
+
+    const valor = total(list);
+
+    if (!confirm(
+        'Confirma o recebimento de ' +
+        money(valor) +
+        ' referente à ' + mesa + '?'
+    )) return;
+
+    busy = true;
+
+    renderModal();
+
+    try {
+
+        // Conferir alterações antes de solicitar pagamento.
+
+        const { data: atuais, error: checkError } =
+            await sb
+                .from('pedidos')
+                .select('id,total,status_cozinha')
+                .eq('mesa', mesa)
+                .eq('status_pagamento', 'aberto');
+
+        if (checkError) throw checkError;
+
+        const mesmosPedidos =
+            atuais.length === list.length &&
+            atuais.every(a =>
+                list.some(p =>
+                    p.id === a.id &&
+                    Number(p.total) === Number(a.total)
+                )
+            );
+
+        if (!mesmosPedidos ||
+            atuais.some(p => p.status_cozinha !== 'pronto')
+        ) {
+
+            throw new Error(
+                'A conta foi alterada. Confira os valores novamente.'
+            );
+        }
+
+        const { data, error } = await sb.rpc(
+            'fechar_conta',
+            {
+                p_pedidos_ids: list.map(p => p.id)
+            }
+        );
+
+        if (error) throw error;
+
+        closeMesa();
+
+        notice(
+            mesa + ' · Pagamento registrado: ' +
+            money(data.total_pago)
+        );
+
+    } catch (e) {
+
+        notice(
+            e.message || 'Erro ao fechar conta.',
+            true
+        );
+
+    } finally {
+
+        busy = false;
+
+        await load();
+
+        render();
+    }
+};
+
+/* CARREGAR DADOS */
+
+async function load() {
+
+    if (!user) return;
+
+    const current = ++version;
+
+    try {
+
+        const rows = [];
+        const pageSize = 500;
+
+        for (let start = 0; ; start += pageSize) {
+
             const { data, error } = await sb
                 .from('pedidos')
-                .select('*')
-                .eq('status_pagamento', 'aberto')
-                .order('created_at', { ascending: true });
+                .select(
+                    'id,mesa,cliente,itens,total,' +
+                    'status_cozinha,status_pagamento,created_at'
+                )
+                .order('id', { ascending: true })
+                .range(start, start + pageSize - 1);
 
-            if (!error && data) {
-                agruparEExibirMesas(data);
-            }
+            if (current !== version || !user) return;
+
+            if (error) throw error;
+
+            rows.push(...data);
+
+            if (data.length < pageSize) break;
         }
 
-        function agruparEExibirMesas(pedidos) {
-            const container = document.getElementById('listaCaixa');
-            container.innerHTML = '';
+        if (current !== version || !user) return;
 
-            if (pedidos.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-20">
-                        <p class="text-gray-500 text-base font-medium">Nenhuma mesa com consumo aberto no momento. Caixa livre! 💰</p>
-                    </div>`;
-                return;
+        pedidos = rows;
+
+        render();
+
+    } catch (e) {
+
+        if (current === version && user) {
+
+            notice(
+                'Erro ao carregar pedidos: ' + e.message,
+                true
+            );
+        }
+    }
+}
+
+/* AUTENTICAÇÃO E REALTIME */
+
+async function start(session) {
+
+    if (!session) return;
+
+    if (
+        session.user.app_metadata?.funcao !== 'caixa' ||
+        session.user.is_anonymous
+    ) {
+
+        await sb.auth.signOut({ scope: 'local' });
+
+        notice('Esta conta não possui acesso ao caixa.', true);
+
+        return;
+    }
+
+    user = session.user;
+
+    $('login').hidden = true;
+
+    $('panel').hidden = false;
+
+    $('tools').hidden = false;
+
+    $('connection').textContent = 'Conectando…';
+
+    if (channel) {
+
+        await sb.removeChannel(channel);
+    }
+
+    channel = sb
+        .channel('amora-caixa')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'pedidos'
+            },
+            () => load()
+        )
+        .subscribe(status => {
+
+            $('connection').textContent =
+                status === 'SUBSCRIBED'
+                ? '● Conectado em tempo real'
+                : 'Conexão: ' + status;
+
+            if (status === 'SUBSCRIBED') {
+                load();
             }
+        });
 
-            const mesasMap = {};
-            pedidos.forEach(pedido => {
-                const mesa = pedido.mesa || 'Mesa 01';
-                if (!mesasMap[mesa]) {
-                    mesasMap[mesa] = {
-                        mesa: mesa,
-                        pedidosIds: [],
-                        clientes: new Set(),
-                        itensGerais: [],
-                        totalGeral: 0
-                    };
-                }
-                mesasMap[mesa].pedidosIds.push(pedido.id);
-                mesasMap[mesa].clientes.add(pedido.cliente);
-                mesasMap[mesa].totalGeral += Number(pedido.total);
-                
-                if (pedido.itens && Array.isArray(pedido.itens)) {
-                    pedido.itens.forEach(item => {
-                        mesasMap[mesa].itensGerais.push(item);
-                    });
-                }
+    await load();
+}
+
+/* LOGIN */
+
+$('login').onsubmit = async e => {
+
+    e.preventDefault();
+
+    const btn = e.currentTarget.querySelector('button');
+
+    btn.disabled = true;
+
+    notice('');
+
+    try {
+
+        const { data, error } =
+            await sb.auth.signInWithPassword({
+                email: $('email').value.trim(),
+                password: $('password').value
             });
 
-            Object.values(mesasMap).forEach(dadosMesa => {
-                let itensHtml = dadosMesa.itensGerais.map(i => `
-                    <li class="flex justify-between text-sm py-1 border-b border-gray-800/60 last:border-0">
-                        <span class="text-gray-300">• ${i.nome}</span>
-                        <span class="text-gray-400 text-xs">R$ ${Number(i.preco).toFixed(2).replace('.', ',')}</span>
-                    </li>
-                `).join('');
+        if (error) throw error;
 
-                let listaClientes = Array.from(dadosMesa.clientes).join(', ');
+        $('password').value = '';
 
-                let card = document.createElement('div');
-                card.className = 'bg-gray-900 border border-emerald-500/40 rounded-2xl p-5 shadow-xl flex flex-col justify-between hover:border-emerald-500 transition';
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="bg-emerald-600 text-white px-3 py-1 rounded-lg font-black text-xs tracking-wider shadow-sm">${dadosMesa.mesa}</span>
-                            <span class="text-xs text-gray-400 font-mono bg-gray-800 px-2 py-1 rounded">👤 ${listaClientes}</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-200 mb-2 border-b border-gray-800 pb-2">Consumo Acumulado</h3>
-                        <ul class="space-y-1 mb-5 max-h-48 overflow-y-auto pr-1">${itensHtml}</ul>
-                    </div>
-                    <div class="border-t border-gray-800 pt-3">
-                        <div class="flex justify-between items-center mb-3 px-1">
-                            <span class="text-xs font-bold text-gray-400">TOTAL DA MESA:</span>
-                            <span class="text-emerald-400 text-lg font-black">R$ ${dadosMesa.totalGeral.toFixed(2).replace('.', ',')}</span>
-                        </div>
-                        <button onclick='fecharConta(${JSON.stringify(dadosMesa.pedidosIds)})' class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold py-3 rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
-                            <span>Receber e Fechar Mesa</span> 💳
-                        </button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
+        await start(data.session);
+
+    } catch (e) {
+
+        notice(
+            'Não foi possível entrar: ' + e.message,
+            true
+        );
+
+    } finally {
+
+        btn.disabled = false;
+    }
+};
+
+/* LOGOUT */
+
+$('logout').onclick = async () => {
+
+    user = null;
+
+    version++;
+
+    if (channel) {
+        await sb.removeChannel(channel);
+    }
+
+    await sb.auth.signOut({ scope: 'local' });
+
+    location.reload();
+};
+
+/* NAVEGAÇÃO */
+
+$('openTab').onclick = () => {
+
+    tab = 'aberto';
+
+    $('openTab').className = '';
+    $('paidTab').className = 'secondary';
+
+    render();
+};
+
+$('paidTab').onclick = () => {
+
+    tab = 'pago';
+
+    $('paidTab').className = '';
+    $('openTab').className = 'secondary';
+
+    render();
+};
+
+$('refresh').onclick = load;
+
+/* RESTABELECER CONEXÃO */
+
+window.addEventListener('online', load);
+
+document.addEventListener(
+    'visibilitychange',
+    () => {
+
+        if (!document.hidden) {
+            load();
         }
+    }
+);
 
-        async function fecharConta(pedidosIds) {
-            if (!confirm('Deseja realmente confirmar o pagamento e fechar a conta desta mesa?')) return;
+/* RECUPERAR SESSÃO */
 
-            // Altera o status de pagamento para 'pago' (sai do caixa e encerra a comanda)
-            for (let id of pedidosIds) {
-                await sb
-                    .from('pedidos')
-                    .update({ status_pagamento: 'pago' })
-                    .eq('id', id);
-            }
+sb.auth.getSession()
+    .then(({ data, error }) => {
 
-            carregarMesasAbertas();
-        }
+        if (error) throw error;
 
-        sb.channel('public:pedidos-caixa')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, () => {
-              carregarMesasAbertas();
-          })
-          .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, () => {
-              carregarMesasAbertas();
-          })
-          .subscribe((status) => {
-              if (status === 'SUBSCRIBED') {
-                  const lbl = document.getElementById('statusConexao');
-                  const dot = document.getElementById('dotStatus');
-                  lbl.innerText = 'Ao vivo (Conectado)';
-                  lbl.className = 'text-xs font-semibold text-green-400';
-                  dot.className = 'w-2.5 h-2.5 rounded-full bg-green-500';
-              }
-          });
+        return start(data.session);
 
-        carregarMesasAbertas();
-    </script>
+    })
+    .catch(e => notice(e.message, true));
+
+</script>
+
 </body>
 </html>

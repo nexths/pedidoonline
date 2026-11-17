@@ -4,45 +4,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cozinha | Bistrô Amora</title>
+<title>Amora | Cozinha</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
 <style>
+:root {
+    --green: #536749;
+    --dark: #35472e;
+    --light: #eef2e9;
+    --background: #f5f6f3;
+    --text: #282c25;
+    --muted: #858b80;
+    --border: #e7e9e3;
+    --orange: #a77930;
+    --red: #b85c54;
+}
+
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    background: #f5f3ed;
-    color: #30382c;
-    font: 15px 'DM Sans', sans-serif;
-}
-
-header {
-    background: #fffdf8;
-    border-bottom: 1px solid #e3e1d6;
-    padding: 22px 5%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-h1, h2, p {
-    margin: 0;
-}
-
-h1 {
-    font: 600 28px 'Playfair Display', serif;
-}
-
-small, .muted {
-    color: #777d70;
+    background: var(--background);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
 }
 
 button, input {
@@ -50,205 +40,572 @@ button, input {
 }
 
 button {
-    cursor: pointer;
     border: 0;
-    border-radius: 10px;
-    padding: 10px 14px;
-    background: #596b47;
-    color: white;
-    font-weight: 600;
+    cursor: pointer;
     transition: .2s;
-}
-
-button:hover {
-    filter: brightness(.95);
 }
 
 button:disabled {
     opacity: .45;
-    cursor: default;
+    cursor: not-allowed;
 }
 
-button.secondary {
-    background: #e9ecdf;
-    color: #48563b;
+button:not(:disabled):active {
+    transform: scale(.98);
 }
 
-button.danger {
-    background: #f9e8e4;
-    color: #a43b32;
-}
-
-main {
-    max-width: 1500px;
-    margin: auto;
-    padding: 28px 5%;
-}
-
-.stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin: 22px 0;
-}
-
-.stat, article, .login {
-    background: #fffdf8;
-    border: 1px solid #e3e1d6;
-    border-radius: 18px;
-    padding: 20px;
-}
-
-.stat strong {
-    display: block;
-    font-size: 30px;
-    margin-top: 6px;
-}
-
-.grid {
-    display: grid;
-    grid-template-columns: repeat(
-        auto-fit, minmax(min(100%, 320px), 1fr)
-    );
-    gap: 16px;
-    align-items: start;
-}
-
-.orderhead {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    border-bottom: 1px solid #e3e1d6;
-    padding-bottom: 14px;
-}
-
-.item {
-    padding: 14px 0;
-    border-bottom: 1px solid #eeeae0;
-}
-
-.item:last-child {
-    border: 0;
-    padding-bottom: 0;
-}
-
-.line, .actions, .toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.line {
-    justify-content: space-between;
-}
-
-.actions {
-    margin-top: 10px;
-}
-
-.tag {
-    font-size: 12px;
-    padding: 4px 9px;
-    border-radius: 20px;
-    background: #f4e8cb;
-    color: #805e21;
-}
-
-.tag.em_preparo {
-    background: #e2eaf5;
-    color: #345779;
-}
-
-.tag.pronto {
-    background: #e1ead8;
-    color: #44613c;
-}
-
-.tag.cancelado {
-    background: #f9e0db;
-    color: #a43b32;
-}
-
-.cancelado.item {
-    color: #a43b32;
-    background: #fff4f1;
-    padding: 12px;
-    border-radius: 10px;
-    margin-top: 8px;
-}
-
-.cancelado .name {
-    text-decoration: line-through;
-}
-
-.login {
-    max-width: 420px;
-    margin: 8vh auto;
-}
-
-.login input {
-    width: 100%;
-    padding: 13px;
-    border: 1px solid #d8d8ca;
-    border-radius: 9px;
-    margin: 8px 0 16px;
-    background: white;
-}
-
-.login button {
-    width: 100%;
-}
-
-#notice {
-    padding: 12px 5%;
-    background: #ede6cf;
-    color: #735b28;
-}
-
-#notice:empty {
-    display: none;
+svg {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
 }
 
 [hidden] {
     display: none !important;
 }
 
-.empty {
-    padding: 40px;
-    text-align: center;
-    color: #777d70;
+/* CABEÇALHO */
+
+header {
+    background: white;
+    border-bottom: 1px solid var(--border);
 }
 
-.brand {
-    letter-spacing: 3px;
+.header-content {
+    max-width: 1600px;
+    margin: auto;
+    padding: 22px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 37px;
+    color: var(--dark);
+    letter-spacing: -2px;
+    line-height: 1;
+}
+
+.logo span {
+    color: #98aa87;
+}
+
+.subtitle {
     font-size: 10px;
-    text-transform: uppercase;
-    color: #788364;
+    color: var(--muted);
+    letter-spacing: 3px;
+    margin-top: 8px;
 }
 
-footer {
-    padding: 24px;
+.header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.connection {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #bc9a50;
+}
+
+.connection.online .dot {
+    background: #75a16b;
+    box-shadow: 0 0 0 4px #e9f2e6;
+}
+
+.soft-button {
+    background: var(--light);
+    color: var(--green);
+    border-radius: 10px;
+    padding: 11px 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* CONTEÚDO */
+
+main {
+    max-width: 1600px;
+    margin: auto;
+    padding: 32px;
+}
+
+.heading h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.heading p {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 8px 0 26px;
+}
+
+/* INDICADORES */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 28px;
+}
+
+.stat {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.stat-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.stat strong {
+    display: block;
+    font-size: 30px;
+    margin-top: 10px;
+}
+
+.stat.pending strong {
+    color: var(--orange);
+}
+
+.stat.preparing strong {
+    color: #587ba2;
+}
+
+.stat.ready strong {
+    color: var(--green);
+}
+
+/* FILTROS */
+
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.filter {
+    border-radius: 30px;
+    background: white;
+    padding: 11px 18px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.filter.active {
+    background: var(--green);
+    color: white;
+}
+
+/* GRID DE MESAS */
+
+.tables {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill, minmax(min(100%, 340px), 1fr)
+    );
+    align-items: start;
+    gap: 20px;
+}
+
+.table-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.table-header {
+    padding: 22px;
+    border-bottom: 1px solid var(--border);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.table-header h2 {
+    font-size: 25px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.table-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 9px;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 20px;
+    padding: 6px 10px;
+    white-space: nowrap;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.pendente {
+    color: #9d732f;
+    background: #fbf2de;
+}
+
+.em_preparo {
+    color: #577aa3;
+    background: #eaf0f8;
+}
+
+.pronto {
+    color: var(--green);
+    background: var(--light);
+}
+
+.cancelado {
+    color: var(--red);
+    background: #faeeec;
+}
+
+/* ITENS AGRUPADOS */
+
+.products {
+    padding: 5px 22px;
+}
+
+.product {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.product:last-child {
+    border-bottom: 0;
+}
+
+.product-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.quantity {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 43px;
+    height: 43px;
+    border-radius: 11px;
+    background: var(--light);
+    color: var(--green);
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.product-info h3 {
+    margin: 1px 0 5px;
+    font-size: 15px;
+}
+
+.customers {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted);
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 9px;
+}
+
+.details-button {
+    background: transparent;
+    color: var(--muted);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.details-button:hover {
+    background: var(--light);
+}
+
+.product-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 0 56px;
+}
+
+.small-button {
+    background: var(--light);
+    color: var(--green);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* AÇÕES DA MESA */
+
+.table-actions {
+    background: #fcfcfb;
+    padding: 18px 22px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    gap: 9px;
+}
+
+.main-button {
+    background: var(--green);
+    color: white;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.outline-button {
+    background: white;
+    border: 1px solid #dce4d7;
+    color: var(--green);
+    padding: 13px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    width: 100%;
+}
+
+.cancel-note {
+    padding: 14px 22px;
+    background: #fff5f3;
+    color: var(--red);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.empty {
+    grid-column: 1 / -1;
     text-align: center;
-    color: #818577;
+    padding: 70px 20px;
+    color: var(--muted);
+    background: white;
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+}
+
+.empty svg {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 12px;
+}
+
+.empty strong {
+    display: block;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+
+/* LOGIN */
+
+.login-wrapper {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.login-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 36px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-card h2 {
+    font-size: 24px;
+    margin: 30px 0 8px;
+}
+
+.login-card p {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.login-card label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.login-card input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px;
+    margin: 7px 0 0;
+}
+
+.login-card .main-button {
+    margin-top: 24px;
+}
+
+#loginMessage {
+    color: var(--red);
     font-size: 12px;
 }
 
-@media(max-width: 500px) {
-    .stat {
-        padding: 12px;
-    }
+/* DETALHES INDIVIDUAIS */
 
-    .stat strong {
-        font-size: 24px;
-    }
+dialog {
+    width: min(94%, 520px);
+    border: none;
+    border-radius: 20px;
+    padding: 25px;
+    max-height: 85dvh;
+    overflow: auto;
+    color: var(--text);
+}
 
-    .stat small {
-        font-size: 11px;
-    }
+dialog::backdrop {
+    background: #17201580;
+    backdrop-filter: blur(3px);
+}
 
+dialog h2 {
+    margin: 0;
+    font-size: 23px;
+}
+
+.individual {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 0;
+}
+
+.individual-name {
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.individual-meta {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.individual-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.cancel-button {
+    background: #faeeec;
+    color: var(--red);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+#toast {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    max-width: calc(100% - 40px);
+    background: var(--dark);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    z-index: 100;
+    box-shadow: 0 5px 25px #0002;
+}
+
+#toast.error {
+    background: #a74e46;
+}
+
+#message {
+    margin-bottom: 20px;
+    background: #fff2df;
+    padding: 14px;
+    border-radius: 10px;
+    color: #99702d;
+    font-size: 13px;
+}
+
+@media(max-width: 700px) {
     main {
-        padding: 18px 4%;
+        padding: 22px 16px;
+    }
+
+    .header-content {
+        padding: 20px 16px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .stat {
+        padding: 15px;
+    }
+
+    .heading h1 {
+        font-size: 29px;
+    }
+
+    .header-actions {
+        gap: 8px;
     }
 }
 </style>
@@ -256,111 +613,155 @@ footer {
 
 <body>
 
-<header>
-    <div>
-        <div class="brand">Bistrô Amora</div>
-        <h1>Painel da cozinha</h1>
-        <small id="connection">Aguardando login</small>
-    </div>
+<section class="login-wrapper" id="loginView">
+    <form class="login-card" id="loginForm">
 
-    <div class="toolbar" id="tools" hidden>
-        <button class="secondary" id="sound">
-            Ativar som
+        <div class="logo">amora<span>.</span></div>
+        <div class="subtitle">BISTRÔ & CAFÉ</div>
+
+        <h2>Painel da cozinha</h2>
+        <p>Entre com sua conta para gerenciar os pedidos.</p>
+
+        <label for="email">E-mail</label>
+        <input
+            id="email"
+            type="email"
+            autocomplete="username"
+            required
+        >
+
+        <label for="password">Senha</label>
+        <input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            required
+        >
+
+        <button class="main-button" id="loginButton">
+            Entrar na cozinha
         </button>
 
-        <button class="secondary" id="refresh">
-            Atualizar
-        </button>
-
-        <button class="secondary" id="logout">
-            Sair
-        </button>
-    </div>
-</header>
-
-<div id="notice" role="status"></div>
-
-<main>
-
-    <form class="login" id="login">
-
-        <h2>Acesso da cozinha</h2>
-        <p class="muted">Entre com a conta da equipe.</p>
-
-        <br>
-
-        <label>
-            E-mail
-            <input id="email"
-                   type="email"
-                   required
-                   autocomplete="username">
-        </label>
-
-        <label>
-            Senha
-            <input id="password"
-                   type="password"
-                   required
-                   autocomplete="current-password">
-        </label>
-
-        <button type="submit">Entrar</button>
+        <p id="loginMessage"></p>
 
     </form>
+</section>
 
-    <section id="panel" hidden>
+<div id="dashboard" hidden>
 
-        <h2>Pedidos da cozinha</h2>
+    <header>
+        <div class="header-content">
 
-        <p class="muted">
-            Acompanhe e atualize cada produto individualmente.
-        </p>
-
-        <div class="stats">
-
-            <div class="stat">
-                <small>Itens pendentes</small>
-                <strong id="pending">0</strong>
+            <div>
+                <div class="logo">amora<span>.</span></div>
+                <div class="subtitle">GESTÃO DA COZINHA</div>
             </div>
 
-            <div class="stat">
-                <small>Em preparo</small>
-                <strong id="preparing">0</strong>
-            </div>
+            <div class="header-actions">
 
-            <div class="stat">
-                <small>Prontos</small>
-                <strong id="ready">0</strong>
-            </div>
+                <div class="connection" id="connection">
+                    <span class="dot"></span>
+                    <span id="connectionText">Conectando</span>
+                </div>
 
+                <button class="soft-button" id="soundButton">
+                    <i data-lucide="volume-x"></i>
+                    Ativar som
+                </button>
+
+                <button class="soft-button" id="logout">
+                    <i data-lucide="log-out"></i>
+                    Sair
+                </button>
+
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <div class="heading">
+            <h1>Central de pedidos</h1>
+            <p>Organize o preparo e acompanhe suas mesas.</p>
         </div>
 
-        <div class="toolbar" style="margin-bottom:16px">
+        <section class="stats">
 
-            <button id="active">
+            <div class="stat">
+                <div class="stat-label">
+                    <i data-lucide="utensils"></i>
+                    Mesas abertas
+                </div>
+                <strong id="statTables">0</strong>
+            </div>
+
+            <div class="stat pending">
+                <div class="stat-label">
+                    <i data-lucide="clock"></i>
+                    Itens pendentes
+                </div>
+                <strong id="statPending">0</strong>
+            </div>
+
+            <div class="stat preparing">
+                <div class="stat-label">
+                    <i data-lucide="chef-hat"></i>
+                    Em preparo
+                </div>
+                <strong id="statPreparing">0</strong>
+            </div>
+
+            <div class="stat ready">
+                <div class="stat-label">
+                    <i data-lucide="check-circle"></i>
+                    Itens prontos
+                </div>
+                <strong id="statReady">0</strong>
+            </div>
+
+        </section>
+
+        <nav class="filters">
+
+            <button class="filter active" data-filter="active">
                 Em andamento
             </button>
 
-            <button class="secondary" id="all">
-                Todos em aberto / cancelados
+            <button class="filter" data-filter="all">
+                Todas as mesas abertas
             </button>
 
-        </div>
+            <button class="filter" data-filter="cancelled">
+                Cancelamentos
+            </button>
 
-        <div id="orders" class="grid"></div>
+        </nav>
 
-    </section>
+        <div id="message" hidden></div>
+        <div class="tables" id="tables"></div>
 
-</main>
+    </main>
 
-<footer>
-    Bistrô Amora · Gestão de pedidos
-</footer>
+</div>
+
+<dialog id="details">
+
+    <div class="row">
+        <h2 id="detailsTitle">Detalhes</h2>
+        <button class="soft-button" id="closeDetails">
+            <i data-lucide="x"></i>
+        </button>
+    </div>
+
+    <div id="detailsContent"></div>
+
+</dialog>
+
+<div id="toast" hidden role="status"></div>
 
 <script>
 
-const sb = supabase.createClient(
+const sb = window.supabase.createClient(
     'https://lcwmwyreawzjrggnbpcz.supabase.co',
     'sb_publishable_H4H0Xa_exMThiz4ky09IYQ_BU44zcd4',
     {
@@ -372,13 +773,31 @@ const sb = supabase.createClient(
 
 const $ = id => document.getElementById(id);
 
-let rows = [];
+const esc = value =>
+    String(value ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[c]));
+
+function icons() {
+    window.lucide?.createIcons();
+}
+
+let orders = [];
+let groups = new Map();
+let actions = [];
+let filter = 'active';
+let busy = false;
+let authenticated = false;
 let channel = null;
-let user = null;
-let all = false;
-let context = null;
-let version = 0;
-let busy = new Set();
+let audio = null;
+let soundEnabled = false;
+let selectedDetails = null;
+let requestSequence = 0;
+let toastTimer;
 
 const labels = {
     pendente: 'Pendente',
@@ -387,277 +806,749 @@ const labels = {
     cancelado: 'Cancelado'
 };
 
-/* ELEMENTOS DA INTERFACE */
+/* NOTIFICAÇÕES */
 
-function node(tag, text, cls) {
+function toast(message, error = false) {
+    $('toast').textContent = message;
+    $('toast').className = error ? 'error' : '';
+    $('toast').hidden = false;
 
-    const e = document.createElement(tag);
+    clearTimeout(toastTimer);
 
-    if (text !== undefined) {
-        e.textContent = text;
-    }
-
-    if (cls) {
-        e.className = cls;
-    }
-
-    return e;
+    toastTimer = setTimeout(() => {
+        $('toast').hidden = true;
+    }, 4500);
 }
 
-function notice(t = '') {
-    $('notice').textContent = t;
+function connection(online) {
+    $('connection').classList.toggle('online', online);
+
+    $('connectionText').textContent =
+        online ? 'Tempo real' : 'Reconectando';
 }
 
-/* ALERTAS SONOROS */
+/* SOM */
 
-function beep(cancel = false) {
-
-    if (!context || context.state !== 'running') {
-        return;
-    }
-
-    for (let i = 0; i < (cancel ? 3 : 2); i++) {
-
-        const o = context.createOscillator();
-        const g = context.createGain();
-        const t = context.currentTime + i * .22;
-
-        o.frequency.value = cancel ? 420 : 780;
-
-        g.gain.setValueAtTime(.09, t);
-
-        g.gain.exponentialRampToValueAtTime(
-            .001, t + .16
-        );
-
-        o.connect(g);
-        g.connect(context.destination);
-
-        o.start(t);
-        o.stop(t + .18);
-    }
-}
-
-$('sound').onclick = async () => {
+$('soundButton').onclick = async () => {
 
     try {
+        if (!audio) {
+            const AudioClass =
+                window.AudioContext ||
+                window.webkitAudioContext;
 
-        context ||= new (
-            window.AudioContext ||
-            window.webkitAudioContext
-        )();
+            audio = new AudioClass();
+        }
 
-        await context.resume();
+        await audio.resume();
 
-        beep();
+        soundEnabled = !soundEnabled;
 
-        $('sound').textContent = 'Som ativado';
+        $('soundButton').innerHTML = soundEnabled
+            ? '<i data-lucide="volume-2"></i> Som ativo'
+            : '<i data-lucide="volume-x"></i> Ativar som';
 
-    } catch (e) {
+        icons();
 
-        notice('Não foi possível ativar o áudio.');
+        if (soundEnabled) beep();
 
+    } catch {
+        toast('Não foi possível ativar o som.', true);
     }
 };
 
-/* PRODUTOS DO PEDIDO */
+function beep(cancelled = false) {
 
-function items(o) {
-    return Array.isArray(o.itens) ? o.itens : [];
+    if (!soundEnabled || !audio) return;
+
+    const frequencies = cancelled
+        ? [700, 450, 700]
+        : [620, 880];
+
+    frequencies.forEach((frequency, index) => {
+
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+
+        const time = audio.currentTime + index * .23;
+
+        oscillator.frequency.value = frequency;
+        oscillator.type = 'sine';
+
+        gain.gain.setValueAtTime(.12, time);
+
+        gain.gain.exponentialRampToValueAtTime(
+            .001, time + .2
+        );
+
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+
+        oscillator.start(time);
+        oscillator.stop(time + .21);
+
+    });
 }
 
-/* RENDERIZAR OS PEDIDOS */
+/* AUTENTICAÇÃO */
+
+function isKitchen(session) {
+
+    return Boolean(
+        session?.user &&
+        !session.user.is_anonymous &&
+        session.user.app_metadata?.funcao === 'cozinha'
+    );
+}
+
+$('loginForm').onsubmit = async e => {
+
+    e.preventDefault();
+
+    $('loginButton').disabled = true;
+    $('loginMessage').textContent = 'Entrando...';
+
+    try {
+
+        const { data, error } =
+            await sb.auth.signInWithPassword({
+                email: $('email').value.trim(),
+                password: $('password').value
+            });
+
+        if (error) throw error;
+
+        if (!isKitchen(data.session)) {
+
+            await sb.auth.signOut({ scope: 'local' });
+
+            throw new Error(
+                'Esta conta não possui acesso à cozinha.'
+            );
+        }
+
+        $('password').value = '';
+
+        await openDashboard();
+
+    } catch (e) {
+
+        $('loginMessage').textContent =
+            e.message || 'Não foi possível entrar.';
+
+    } finally {
+
+        $('loginButton').disabled = false;
+    }
+};
+
+$('logout').onclick = async () => {
+
+    authenticated = false;
+    requestSequence++;
+
+    if (channel) {
+        await sb.removeChannel(channel);
+        channel = null;
+    }
+
+    await sb.auth.signOut({ scope: 'local' });
+
+    location.reload();
+};
+
+/* AGRUPAR PEDIDOS POR MESA */
+
+function buildGroups() {
+
+    const result = new Map();
+
+    for (const order of orders) {
+
+        const mesa = order.mesa;
+
+        if (!result.has(mesa)) {
+
+            result.set(mesa, {
+                mesa,
+                items: [],
+                cancelled: [],
+                customers: new Set(),
+                orders: new Set()
+            });
+        }
+
+        const group = result.get(mesa);
+
+        for (const item of order.itens || []) {
+
+            const entry = {
+                ...item,
+
+                pedido_id: order.id,
+
+                cliente: order.cliente || 'Cliente',
+
+                usuario_id: order.usuario_id,
+
+                pagamento: order.status_pagamento,
+
+                status: item.status || 'desconhecido'
+            };
+
+            if (entry.status === 'cancelado') {
+
+                group.cancelled.push(entry);
+
+            } else if (
+                order.status_pagamento === 'aberto'
+            ) {
+
+                group.items.push(entry);
+
+                group.customers.add(
+                    order.usuario_id ||
+                    'legacy-' + order.id
+                );
+
+                group.orders.add(order.id);
+            }
+        }
+    }
+
+    return result;
+}
+
+function productKey(item) {
+
+    return String(
+        item.produto_id ?? item.nome
+    );
+}
+
+function groupProducts(items) {
+
+    const result = new Map();
+
+    for (const item of items) {
+
+        const key = productKey(item);
+
+        if (!result.has(key)) {
+
+            result.set(key, {
+                key,
+                nome: item.nome,
+                items: []
+            });
+        }
+
+        result.get(key).items.push(item);
+    }
+
+    return [...result.values()];
+}
+
+function countStatus(items, status) {
+
+    return items.filter(
+        item => item.status === status
+    ).length;
+}
+
+function eligible(items, status) {
+
+    return items.filter(item =>
+        item.id &&
+        item.pagamento === 'aberto' &&
+        item.status === status
+    );
+}
+
+function customerSummary(items) {
+
+    const customers = new Map();
+
+    for (const item of items) {
+
+        const name = item.cliente;
+
+        customers.set(
+            name,
+            (customers.get(name) || 0) + 1
+        );
+    }
+
+    return [...customers].map(
+        ([name, quantity]) => `${quantity}× ${name}`
+    ).join(' · ');
+}
+
+/* REGISTRAR AÇÕES */
+
+function actionButton(text, className, callback) {
+
+    const index = actions.push(callback) - 1;
+
+    return `
+        <button
+            class="${className}"
+            data-action="${index}"
+            ${busy ? 'disabled' : ''}
+        >
+            ${text}
+        </button>
+    `;
+}
+
+/* EXIBIR STATUS */
+
+function statusHTML(status, text) {
+
+    return `
+        <span class="status ${esc(status)}">
+            ${esc(text)}
+        </span>
+    `;
+}
+
+function renderProduct(product, group) {
+
+    const items = product.items;
+
+    const pending = countStatus(items, 'pendente');
+    const preparing = countStatus(items, 'em_preparo');
+    const ready = countStatus(items, 'pronto');
+
+    const startItems = eligible(items, 'pendente');
+    const finishItems = eligible(items, 'em_preparo');
+
+    const badges = [
+
+        pending
+            ? statusHTML('pendente', pending + ' pendente(s)')
+            : '',
+
+        preparing
+            ? statusHTML('em_preparo', preparing + ' em preparo')
+            : '',
+
+        ready
+            ? statusHTML('pronto', ready + ' pronto(s)')
+            : ''
+
+    ].join('');
+
+    return `
+
+        <div class="product">
+
+            <div class="product-main">
+
+                <div class="quantity">
+                    ${items.length}×
+                </div>
+
+                <div class="product-info">
+
+                    <h3>${esc(product.nome)}</h3>
+
+                    <div class="customers">
+                        ${esc(customerSummary(items))}
+                    </div>
+
+                    <div class="badges">
+                        ${badges}
+                    </div>
+
+                </div>
+
+                ${actionButton(
+                    '<i data-lucide="ellipsis-vertical"></i>',
+                    'details-button',
+                    () => openDetails(group.mesa, product.key)
+                )}
+
+            </div>
+
+            <div class="product-actions">
+
+                ${startItems.length
+                    ? actionButton(
+                        'Iniciar ' + startItems.length,
+                        'small-button',
+                        () => changeBatch(startItems, 'em_preparo')
+                    )
+                    : ''
+                }
+
+                ${finishItems.length
+                    ? actionButton(
+                        'Finalizar ' + finishItems.length,
+                        'small-button',
+                        () => changeBatch(finishItems, 'pronto')
+                    )
+                    : ''
+                }
+
+            </div>
+
+        </div>
+    `;
+}
+
+/* EXIBIR MESA */
+
+function renderTable(group) {
+
+    const items = group.items;
+
+    const pending = eligible(items, 'pendente');
+
+    const preparing = eligible(items, 'em_preparo');
+
+    const products = groupProducts(items);
+
+    let status = 'pronto';
+
+    if (countStatus(items, 'pendente')) {
+        status = 'pendente';
+    } else if (countStatus(items, 'em_preparo')) {
+        status = 'em_preparo';
+    } else if (!items.length) {
+        status = 'cancelado';
+    } else if (items.some(i => !labels[i.status])) {
+        status = 'pendente';
+    }
+
+    return `
+
+        <article class="table-card">
+
+            <div class="table-header">
+
+                <div class="row">
+
+                    <h2>${esc(group.mesa)}</h2>
+
+                    ${statusHTML(status, labels[status])}
+
+                </div>
+
+                <div class="table-meta">
+
+                    ${group.customers.size} cliente(s)
+                    · ${items.length} item(ns)
+                    · ${group.orders.size} pedido(s)
+
+                </div>
+
+            </div>
+
+            <div class="products">
+
+                ${products.map(
+                    p => renderProduct(p, group)
+                ).join('')}
+
+            </div>
+
+            ${group.cancelled.length ? `
+
+                <div class="cancel-note">
+
+                    <strong>Itens cancelados</strong>
+
+                    ${group.cancelled.map(i => `
+                        <div>
+                            ${esc(i.nome)}
+                            · ${esc(i.cliente)}
+                        </div>
+                    `).join('')}
+
+                </div>
+
+            ` : ''}
+
+            ${pending.length || preparing.length ? `
+
+                <div class="table-actions">
+
+                    ${pending.length
+                        ? actionButton(
+                            '<i data-lucide="chef-hat"></i>' +
+                            'Iniciar preparo (' +
+                            pending.length + ')',
+                            'main-button',
+                            () => changeBatch(
+                                pending,
+                                'em_preparo'
+                            )
+                        )
+                        : ''
+                    }
+
+                    ${preparing.length
+                        ? actionButton(
+                            'Finalizar preparo (' +
+                            preparing.length + ')',
+                            'outline-button',
+                            () => changeBatch(
+                                preparing,
+                                'pronto'
+                            )
+                        )
+                        : ''
+                    }
+
+                </div>
+
+            ` : ''}
+
+        </article>
+    `;
+}
+
+/* INDICADORES E FILTROS */
 
 function render() {
 
-    const root = $('orders');
+    groups = buildGroups();
 
-    root.replaceChildren();
+    actions = [];
 
-    const open = rows.filter(
-        o => o.status_pagamento === 'aberto'
-    );
+    const all = [...groups.values()];
 
-    for (const [id, status] of [
-        ['pending', 'pendente'],
-        ['preparing', 'em_preparo'],
-        ['ready', 'pronto']
-    ]) {
+    const active = all.flatMap(group => group.items);
 
-        $(id).textContent = open
-            .flatMap(items)
-            .filter(i => i.status === status)
-            .length;
-    }
+    $('statTables').textContent =
+        all.filter(group => group.items.length).length;
 
-    const list = rows.filter(o =>
-        all ||
-        o.status_pagamento === 'cancelado' ||
-        items(o).some(i =>
-            ['pendente', 'em_preparo'].includes(i.status)
-        )
-    );
+    $('statPending').textContent =
+        countStatus(active, 'pendente');
 
-    if (!list.length) {
+    $('statPreparing').textContent =
+        countStatus(active, 'em_preparo');
 
-        root.append(
-            node(
-                'div',
-                'Nenhum pedido nesta visualização.',
-                'empty'
-            )
+    $('statReady').textContent =
+        countStatus(active, 'pronto');
+
+    const visible = all.filter(group => {
+
+        if (filter === 'cancelled') {
+            return group.cancelled.length > 0;
+        }
+
+        if (filter === 'all') {
+            return group.items.length > 0;
+        }
+
+        return group.items.some(item =>
+            item.status !== 'pronto'
         );
 
+    });
+
+    visible.sort((a, b) => {
+
+        const firstA = Math.min(
+            ...a.items.map(i => Number(i.pedido_id))
+        );
+
+        const firstB = Math.min(
+            ...b.items.map(i => Number(i.pedido_id))
+        );
+
+        if (firstA !== firstB) {
+            return firstA - firstB;
+        }
+
+        return a.mesa.localeCompare(b.mesa);
+
+    });
+
+    $('tables').innerHTML = visible.map(renderTable)
+        .join('') || `
+
+        <div class="empty">
+
+            <i data-lucide="coffee"></i>
+
+            <strong>Nenhum pedido nesta visualização</strong>
+
+            Os novos pedidos aparecerão automaticamente.
+
+        </div>
+
+    `;
+
+    if ($('details').open && selectedDetails) {
+        renderDetails();
+    }
+
+    icons();
+}
+
+/* ATUALIZAR VÁRIOS ITENS */
+
+async function changeBatch(items, status) {
+
+    if (busy || !authenticated || !items.length) {
         return;
     }
 
-    for (const o of list) {
+    busy = true;
+    render();
 
-        const card = node('article');
+    try {
 
-        const head = node(
-            'div', undefined, 'orderhead'
-        );
+        const { data, error } = await sb.rpc(
+            'gerenciar_itens_lote',
+            {
+                p_itens: items.map(item => ({
+                    pedido_id: item.pedido_id,
+                    item_id: item.id
+                })),
 
-        const left = node('div');
-
-        left.append(
-            node('h2', o.mesa),
-            node(
-                'small',
-                o.cliente + ' · Pedido #' + o.id
-            )
-        );
-
-        head.append(
-            left,
-            node(
-                'small',
-                new Date(o.created_at)
-                    .toLocaleTimeString('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })
-            )
-        );
-
-        card.append(head);
-
-        for (const i of items(o)) {
-
-            const s = i.status || 'legado';
-
-            const line = node(
-                'div', undefined, 'item ' + s
-            );
-
-            const top = node(
-                'div', undefined, 'line'
-            );
-
-            top.append(
-                node('strong', i.nome, 'name'),
-                node(
-                    'span',
-                    labels[s] || 'Pedido antigo',
-                    'tag ' + s
-                )
-            );
-
-            line.append(top);
-
-            if (s === 'cancelado') {
-
-                line.append(
-                    node(
-                        'small',
-                        'Cancelado por ' +
-                        (i.cancelado_por || '—') +
-                        (
-                            i.motivo_cancelamento
-                            ? ' · ' + i.motivo_cancelamento
-                            : ''
-                        )
-                    )
-                );
+                p_novo_status: status
             }
+        );
 
-            if (
-                o.status_pagamento === 'aberto' &&
-                i.id &&
-                ['pendente', 'em_preparo'].includes(s)
-            ) {
+        if (error) throw error;
 
-                const a = node(
-                    'div', undefined, 'actions'
-                );
+        toast(
+            status === 'em_preparo'
+                ? `${data.itens_atualizados} item(ns) em preparo.`
+                : `${data.itens_atualizados} item(ns) finalizado(s).`
+        );
 
-                const buttons = [
-                    [
-                        s === 'pendente'
-                        ? 'Iniciar preparo'
-                        : 'Marcar pronto',
+    } catch (e) {
 
-                        s === 'pendente'
-                        ? 'em_preparo'
-                        : 'pronto',
+        toast(e.message || 'Erro ao atualizar itens.', true);
 
-                        ''
-                    ],
-                    [
-                        'Cancelar',
-                        'cancelado',
-                        'danger'
-                    ]
-                ];
+    } finally {
 
-                for (const [label, next, cls] of buttons) {
+        await loadOrders();
 
-                    const b = node(
-                        'button', label, cls
-                    );
+        busy = false;
 
-                    b.disabled = busy.has(
-                        o.id + ':' + i.id
-                    );
-
-                    b.onclick = () => change(o, i, next);
-
-                    a.append(b);
-                }
-
-                line.append(a);
-            }
-
-            card.append(line);
-        }
-
-        root.append(card);
+        render();
     }
 }
 
-/* ALTERAR STATUS COM SEGURANÇA */
+/* DETALHES POR CLIENTE */
 
-async function change(o, i, s) {
+function openDetails(mesa, product) {
 
-    let reason = null;
+    selectedDetails = { mesa, product };
 
-    if (s === 'cancelado') {
+    $('details').showModal();
 
-        reason = prompt(
-            'Motivo do cancelamento (opcional):',
-            ''
-        );
+    render();
+}
 
-        if (reason === null) {
-            return;
-        }
+function renderDetails() {
+
+    const group = groups.get(selectedDetails.mesa);
+
+    const items = group?.items.filter(
+        i => productKey(i) === selectedDetails.product
+    ) || [];
+
+    $('detailsTitle').textContent =
+        items[0]?.nome || 'Detalhes do produto';
+
+    $('detailsContent').innerHTML = items.map(item => `
+
+        <div class="individual">
+
+            <div class="row">
+
+                <div>
+
+                    <div class="individual-name">
+                        ${esc(item.cliente)}
+                    </div>
+
+                    <div class="individual-meta">
+                        ${esc(selectedDetails.mesa)}
+                        · Pedido #${esc(item.pedido_id)}
+                    </div>
+
+                </div>
+
+                ${statusHTML(
+                    item.status,
+                    labels[item.status] || 'Indisponível'
+                )}
+
+            </div>
+
+            <div class="individual-actions">
+
+                ${item.id && item.status === 'pendente'
+                    ? actionButton(
+                        'Iniciar preparo',
+                        'small-button',
+                        () => changeBatch([item], 'em_preparo')
+                    )
+                    : ''
+                }
+
+                ${item.id && item.status === 'em_preparo'
+                    ? actionButton(
+                        'Marcar como pronto',
+                        'small-button',
+                        () => changeBatch([item], 'pronto')
+                    )
+                    : ''
+                }
+
+                ${item.id && ['pendente', 'em_preparo']
+                    .includes(item.status)
+
+                    ? actionButton(
+                        'Cancelar item',
+                        'cancel-button',
+                        () => cancelItem(item)
+                    )
+                    : ''
+                }
+
+            </div>
+
+        </div>
+    `).join('') || '<p>Nenhum item disponível.</p>';
+
+    icons();
+}
+
+$('closeDetails').onclick = () => {
+    $('details').close();
+};
+
+$('details').addEventListener('close', () => {
+    selectedDetails = null;
+});
+
+/* CANCELAMENTO INDIVIDUAL */
+
+async function cancelItem(item) {
+
+    if (busy) return;
+
+    const reason = prompt(
+        'Informe o motivo do cancelamento:'
+    );
+
+    if (reason === null) return;
+
+    if (!reason.trim()) {
+        toast('Informe o motivo do cancelamento.', true);
+        return;
     }
 
-    const key = o.id + ':' + i.id;
-
-    busy.add(key);
-
+    busy = true;
     render();
 
     try {
@@ -665,114 +1556,132 @@ async function change(o, i, s) {
         const { error } = await sb.rpc(
             'gerenciar_item',
             {
-                p_pedido_id: o.id,
-                p_item_id: i.id,
-                p_novo_status: s,
-                p_motivo: reason || null
+                p_pedido_id: item.pedido_id,
+                p_item_id: item.id,
+                p_novo_status: 'cancelado',
+                p_motivo: reason.trim()
             }
         );
 
-        if (error) {
-            throw error;
-        }
+        if (error) throw error;
 
-        notice('Produto atualizado.');
+        toast('Item cancelado com sucesso.');
 
     } catch (e) {
 
-        notice(
-            e.message || 'Falha ao atualizar produto.'
-        );
+        toast(e.message, true);
 
     } finally {
 
-        busy.delete(key);
+        await loadOrders();
 
-        await load();
+        busy = false;
 
         render();
     }
 }
 
-/* CARREGAR PEDIDOS */
+/* EVENTOS */
 
-async function load() {
+document.addEventListener('click', event => {
 
-    if (!user) {
-        return;
+    const button = event.target.closest('button');
+
+    if (!button || button.disabled || busy) return;
+
+    if (button.dataset.filter) {
+
+        filter = button.dataset.filter;
+
+        document.querySelectorAll('.filter')
+            .forEach(element => {
+
+                element.classList.toggle(
+                    'active',
+                    element.dataset.filter === filter
+                );
+
+            });
+
+        render();
     }
 
-    const v = ++version;
+    if (button.dataset.action !== undefined) {
 
-    const { data, error } = await sb
-        .from('pedidos')
-        .select(
-            'id,mesa,cliente,itens,total,' +
-            'status_cozinha,status_pagamento,created_at'
-        )
-        .in(
-            'status_pagamento',
-            ['aberto', 'cancelado']
-        )
-        .order(
-            'created_at',
-            { ascending: true }
-        );
+        const action = actions[
+            Number(button.dataset.action)
+        ];
 
-    if (v !== version || !user) {
-        return;
+        if (action) action();
     }
+});
 
-    if (error) {
+/* CONSULTAR PEDIDOS */
 
-        notice(
-            'Erro ao carregar pedidos: ' +
-            error.message
-        );
+async function loadOrders() {
 
-        return;
-    }
+    if (!authenticated) return;
 
-    rows = data || [];
+    const sequence = ++requestSequence;
 
-    render();
-}
+    try {
 
-/* AUTENTICAÇÃO E REALTIME */
+        const rows = [];
+        let offset = 0;
 
-async function start(session) {
+        while (true) {
 
-    if (
-        !session ||
-        session.user.app_metadata?.funcao !== 'cozinha' ||
-        session.user.is_anonymous
-    ) {
+            const { data, error } = await sb
+                .from('pedidos')
+                .select(
+                    'id,mesa,cliente,usuario_id,itens,' +
+                    'status_pagamento,created_at'
+                )
+                .in(
+                    'status_pagamento',
+                    ['aberto', 'cancelado']
+                )
+                .order('id')
+                .range(offset, offset + 499);
 
-        if (session) {
-            await sb.auth.signOut();
+            if (error) throw error;
+
+            rows.push(...(data || []));
+
+            if (!data || data.length < 500) break;
+
+            offset += 500;
         }
 
-        notice(
-            session ? 'Conta sem acesso à cozinha.' : ''
-        );
+        if (
+            sequence !== requestSequence ||
+            !authenticated
+        ) return;
 
-        return;
+        orders = rows;
+
+        $('message').hidden = true;
+
+        render();
+
+    } catch (e) {
+
+        if (sequence !== requestSequence) return;
+
+        $('message').hidden = false;
+
+        $('message').textContent =
+            'Não foi possível atualizar os pedidos: ' +
+            e.message;
     }
+}
 
-    user = session.user;
+/* TEMPO REAL */
 
-    $('login').hidden = true;
-    $('panel').hidden = false;
-    $('tools').hidden = false;
+function subscribe() {
 
-    $('connection').textContent = 'Conectando…';
+    channel = sb.channel('amora-cozinha-pedidos')
 
-    if (channel) {
-        await sb.removeChannel(channel);
-    }
-
-    channel = sb
-        .channel('amora-cozinha')
         .on(
             'postgres_changes',
             {
@@ -780,164 +1689,116 @@ async function start(session) {
                 schema: 'public',
                 table: 'pedidos'
             },
+            payload => {
 
-            p => {
-
-                if (p.eventType === 'INSERT') {
+                if (payload.eventType === 'INSERT') {
 
                     beep();
 
-                    notice(
+                    toast(
                         'Novo pedido: ' +
-                        (p.new.mesa || '')
+                        (payload.new.mesa || '')
                     );
                 }
 
-                if (p.eventType === 'UPDATE') {
+                if (payload.eventType === 'UPDATE') {
 
-                    const previous = rows.find(
-                        o => o.id === p.new.id
+                    const previous = orders.find(
+                        o => o.id === payload.new.id
                     );
 
-                    if (
-                        previous &&
-                        items(p.new).some(i =>
+                    const oldCancelled = new Set(
+                        (previous?.itens || [])
+                            .filter(i => i.status === 'cancelado')
+                            .map(i => i.id)
+                    );
+
+                    const newCancelled =
+                        (payload.new.itens || []).filter(i =>
                             i.status === 'cancelado' &&
-                            !items(previous).some(j =>
-                                j.id === i.id &&
-                                j.status === 'cancelado'
-                            )
-                        )
-                    ) {
+                            !oldCancelled.has(i.id)
+                        );
+
+                    if (previous && newCancelled.length) {
 
                         beep(true);
 
-                        notice(
-                            'Produto cancelado: ' +
-                            p.new.mesa
+                        toast(
+                            'Atenção: cancelamento na ' +
+                            payload.new.mesa
                         );
                     }
                 }
 
-                load();
+                loadOrders();
             }
         )
+
         .subscribe(status => {
 
-            $('connection').textContent =
-                status === 'SUBSCRIBED'
-                ? '● Conectado em tempo real'
-                : 'Conexão: ' + status;
+            connection(status === 'SUBSCRIBED');
 
             if (status === 'SUBSCRIBED') {
-                load();
+                loadOrders();
             }
-        });
 
-    await load();
+        });
 }
 
-/* LOGIN */
+window.addEventListener('offline', () => {
+    connection(false);
+});
 
-$('login').onsubmit = async e => {
+window.addEventListener('online', () => {
+    if (authenticated) loadOrders();
+});
 
-    e.preventDefault();
+document.addEventListener('visibilitychange', () => {
 
-    const b = e.currentTarget.querySelector('button');
+    if (!document.hidden && authenticated) {
+        loadOrders();
+    }
+});
 
-    b.disabled = true;
+/* ABRIR PAINEL */
+
+async function openDashboard() {
+
+    if (authenticated) return;
+
+    authenticated = true;
+
+    $('loginView').hidden = true;
+    $('dashboard').hidden = false;
+
+    icons();
+
+    subscribe();
+
+    await loadOrders();
+}
+
+async function start() {
+
+    icons();
 
     try {
 
-        const { data, error } =
-            await sb.auth.signInWithPassword({
+        const { data, error } = await sb.auth.getSession();
 
-                email: $('email').value.trim(),
+        if (error) throw error;
 
-                password: $('password').value
-
-            });
-
-        if (error) {
-            throw error;
+        if (isKitchen(data.session)) {
+            await openDashboard();
         }
-
-        $('password').value = '';
-
-        await start(data.session);
 
     } catch (e) {
 
-        notice(e.message);
-
-    } finally {
-
-        b.disabled = false;
+        $('loginMessage').textContent = e.message;
     }
-};
+}
 
-/* SAIR */
-
-$('logout').onclick = async () => {
-
-    user = null;
-
-    version++;
-
-    if (channel) {
-        await sb.removeChannel(channel);
-    }
-
-    await sb.auth.signOut();
-
-    location.reload();
-};
-
-/* FILTROS */
-
-$('refresh').onclick = load;
-
-$('active').onclick = () => {
-
-    all = false;
-
-    $('active').className = '';
-
-    $('all').className = 'secondary';
-
-    render();
-};
-
-$('all').onclick = () => {
-
-    all = true;
-
-    $('all').className = '';
-
-    $('active').className = 'secondary';
-
-    render();
-};
-
-/* RECUPERAR CONEXÃO */
-
-window.addEventListener('online', load);
-
-document.addEventListener(
-    'visibilitychange',
-    () => {
-
-        if (!document.hidden) {
-            load();
-        }
-    }
-);
-
-/* RECUPERAR SESSÃO */
-
-sb.auth.getSession()
-    .then(({ data }) => start(data.session))
-    .catch(e => notice(e.message));
+start();
 
 </script>
 

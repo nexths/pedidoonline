@@ -1001,7 +1001,8 @@ function buildGroups() {
                 group.cancelled.push(entry);
 
             } else if (
-                order.status_pagamento === 'aberto'
+                ['aberto', 'pago'].includes(order.status_pagamento) &&
+                !['pronto', 'cancelado'].includes(entry.status)
             ) {
 
                 group.items.push(entry);
@@ -1060,7 +1061,6 @@ function eligible(items, status) {
 
     return items.filter(item =>
         item.id &&
-        item.pagamento === 'aberto' &&
         item.status === status
     );
 }
@@ -1171,27 +1171,7 @@ function renderProduct(product, group) {
 
             </div>
 
-            <div class="product-actions">
 
-                ${startItems.length
-                    ? actionButton(
-                        'Iniciar ' + startItems.length,
-                        'small-button',
-                        () => changeBatch(startItems, 'em_preparo')
-                    )
-                    : ''
-                }
-
-                ${finishItems.length
-                    ? actionButton(
-                        'Finalizar ' + finishItems.length,
-                        'small-button',
-                        () => changeBatch(finishItems, 'pronto')
-                    )
-                    : ''
-                }
-
-            </div>
 
         </div>
     `;
@@ -1253,23 +1233,6 @@ function renderTable(group) {
 
             </div>
 
-            ${group.cancelled.length ? `
-
-                <div class="cancel-note">
-
-                    <strong>Itens cancelados</strong>
-
-                    ${group.cancelled.map(i => `
-                        <div>
-                            ${esc(i.nome)}
-                            · ${esc(i.cliente)}
-                        </div>
-                    `).join('')}
-
-                </div>
-
-            ` : ''}
-
             ${pending.length || preparing.length ? `
 
                 <div class="table-actions">
@@ -1304,6 +1267,25 @@ function renderTable(group) {
                 </div>
 
             ` : ''}
+
+            ${group.cancelled.length ? `
+
+                <div class="cancel-note">
+
+                    <strong>Itens cancelados</strong>
+
+                    ${group.cancelled.map(i => `
+                        <div>
+                            ${esc(i.nome)}
+                            · ${esc(i.cliente)}
+                        </div>
+                    `).join('')}
+
+                </div>
+
+            ` : ''}
+
+
 
         </article>
     `;
@@ -1393,45 +1375,41 @@ function render() {
 
 async function changeBatch(items, status) {
 
-    if (busy || !authenticated || !items.length) {
-        return;
-    }
+    if (busy || !authenticated || !items.length) return;
 
     busy = true;
     render();
 
+    let updated = 0;
+    let failure = null;
+
     try {
-
-        const { data, error } = await sb.rpc(
-            'gerenciar_itens_lote',
-            {
-                p_itens: items.map(item => ({
-                    pedido_id: item.pedido_id,
-                    item_id: item.id
-                })),
-
+        for (const item of items) {
+            const { error } = await sb.rpc('gerenciar_item', {
+                p_pedido_id: item.pedido_id,
+                p_item_id: item.id,
                 p_novo_status: status
+            });
+
+            if (error) {
+                failure = error;
+                break;
             }
-        );
+            updated++;
+        }
 
-        if (error) throw error;
-
-        toast(
-            status === 'em_preparo'
-                ? `${data.itens_atualizados} item(ns) em preparo.`
-                : `${data.itens_atualizados} item(ns) finalizado(s).`
-        );
-
+        if (failure) {
+            toast(`${updated} de ${items.length} itens atualizados. ${failure.message}`, true);
+        } else {
+            toast(status === 'em_preparo'
+                ? `${updated} item(ns) em preparo.`
+                : `${updated} item(ns) finalizado(s).`);
+        }
     } catch (e) {
-
         toast(e.message || 'Erro ao atualizar itens.', true);
-
     } finally {
-
         await loadOrders();
-
         busy = false;
-
         render();
     }
 }
@@ -1639,7 +1617,7 @@ async function loadOrders() {
                 )
                 .in(
                     'status_pagamento',
-                    ['aberto', 'cancelado']
+                    ['aberto', 'pago', 'cancelado']
                 )
                 .order('id')
                 .range(offset, offset + 499);

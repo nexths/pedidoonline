@@ -1460,7 +1460,7 @@ $('send').onclick = async () => {
 
         toast('Pedido enviado com sucesso!');
 
-        showTab('orders');
+        showTab('menu');
 
     } catch (e) {
 
@@ -1486,9 +1486,22 @@ const labels = {
     cancelado: 'Cancelado'
 };
 
+let itensPagosCliente = new Set();
+
 function renderOrders() {
 
-    $('orders').innerHTML = orders.map(o => {
+    // Exibe somente pedidos com itens ainda em atendimento.
+    // Pagamentos não encerram o preparo; pedidos pagos e prontos saem da tela.
+    const pedidosVisiveis = orders.filter(o =>
+        (Array.isArray(o.itens) ? o.itens : []).some(i =>
+            i.status !== 'cancelado' && (
+                !itensPagosCliente.has(i.id) ||
+                !['pronto', 'cancelado'].includes(i.status)
+            )
+        )
+    );
+
+    $('orders').innerHTML = pedidosVisiveis.map(o => {
 
         const payment =
             o.status_pagamento === 'pago'
@@ -1529,6 +1542,7 @@ function renderOrders() {
                 </div>
 
                 ${(Array.isArray(o.itens) ? o.itens : [])
+                .filter(i => i.status === 'cancelado' || !itensPagosCliente.has(i.id) || !['pronto', 'cancelado'].includes(i.status))
                 .map(i => `
 
                     <div class="row order-item">
@@ -1565,6 +1579,7 @@ function renderOrders() {
                             ${
                                 i.status === 'pendente' &&
                                 o.status_pagamento === 'aberto' &&
+                                !itensPagosCliente.has(i.id) &&
                                 i.id
 
                                 ? `<button
@@ -1586,7 +1601,9 @@ function renderOrders() {
 
                     <span>Total do pedido</span>
 
-                    <span>${money(o.total)}</span>
+                    <span>${money((Array.isArray(o.itens) ? o.itens : [])
+                        .filter(i => i.status !== 'cancelado' && !itensPagosCliente.has(i.id))
+                        .reduce((sum, i) => sum + Number(i.preco || 0), 0))}</span>
 
                 </div>
 
@@ -1749,6 +1766,7 @@ async function loadOrders() {
         .select('*')
         .eq('usuario_id', uid)
         .eq('mesa', mesa)
+        .in('status_pagamento', ['aberto', 'pago'])
         .order('created_at', { ascending: false });
 
     if (n !== seq) return;
@@ -1759,8 +1777,16 @@ async function loadOrders() {
         return;
     }
 
+    const { data: pagos, error: erroPagos } = await sb.rpc('meus_itens_pagos', {
+        p_mesa: mesa
+    });
+    if (n !== seq) return;
+    if (erroPagos) {
+        toast('Não foi possível consultar os pagamentos.');
+        return;
+    }
+    itensPagosCliente = new Set((pagos || []).map(i => i.item_id));
     orders = data || [];
-
     renderOrders();
 }
 

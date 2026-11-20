@@ -279,6 +279,17 @@ main {
 .pedido-header {
     background: #eeefe6;
     padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pedido-header .select-card {
+    padding: 8px 11px;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .item {
@@ -514,12 +525,16 @@ footer {
 
         </div>
 
+        <div class="flex" style="margin:12px 0;gap:10px;flex-wrap:wrap">
+            <button type="button" id="toggleAll">Desmarcar todos</button>
+        </div>
+
         <div id="detalhes"></div>
 
         <div class="summary">
 
             <div class="flex">
-                <span>Total da conta</span>
+                <span>Valor a receber</span>
                 <strong id="modalTotal">R$ 0,00</strong>
             </div>
 
@@ -577,6 +592,9 @@ const labels = {
 let user = null;
 let channel = null;
 let pedidos = [];
+let pagosIds = new Set();
+let pagamentos = [];
+let selecionados = new Set();
 let selectedMesa = null;
 let tab = 'aberto';
 let version = 0;
@@ -615,16 +633,24 @@ function items(p) {
     return Array.isArray(p.itens) ? p.itens : [];
 }
 
+function itensAbertos(p) {
+    return items(p).filter(i => i.status !== 'cancelado' && i.id && !pagosIds.has(i.id));
+}
+
+function saldo(p) {
+    return itensAbertos(p).reduce((s, i) => s + Number(i.preco || 0), 0);
+}
+
 function total(list) {
     return list.reduce(
-        (sum, p) => sum + Number(p.total || 0),
+        (sum, p) => sum + saldo(p),
         0
     );
 }
 
 function openOrders() {
     return pedidos.filter(
-        p => p.status_pagamento === 'aberto'
+        p => p.status_pagamento === 'aberto' && saldo(p) > 0
     );
 }
 
@@ -660,13 +686,10 @@ function render() {
     $('totalAberto').textContent =
         money(total(abertas));
 
-    // O banco ainda não registra o horário do pagamento.
-    // Não usar created_at para fingir um faturamento diário.
-
-    $('totalPago').textContent = '—';
-
-    $('totalPago').title =
-        'Disponível após cadastrar a data de pagamento.';
+    const hoje = new Date().toLocaleDateString('sv-SE');
+    $('totalPago').textContent = money(pagamentos.filter(p =>
+        new Date(p.criado_em).toLocaleDateString('sv-SE') === hoje
+    ).reduce((s, p) => s + Number(p.valor || 0), 0));
 
     const root = $('mesas');
 
@@ -711,8 +734,7 @@ function render() {
             );
 
             const quantidade = list
-                .flatMap(items)
-                .filter(i => i.status !== 'cancelado')
+                .flatMap(itensAbertos)
                 .length;
 
             const btn = node('button', 'Visualizar conta');
@@ -742,47 +764,19 @@ function render() {
 /* HISTÓRICO */
 
 function renderHistory(root) {
-
-    const pagos = pedidos
-        .filter(p => p.status_pagamento === 'pago')
-        .slice()
-        .reverse();
-
-    if (!pagos.length) {
-
-        root.append(
-            node('div', 'Nenhum pagamento encontrado.', 'empty')
-        );
-
+    const historico = pagamentos.slice().reverse();
+    if (!historico.length) {
+        root.append(node('div', 'Nenhum pagamento parcial registrado ainda.', 'empty'));
         return;
     }
-
-    for (const p of pagos) {
-
+    for (const pg of historico) {
         const card = node('article', undefined, 'mesa');
-
-        const head = node('div', undefined, 'flex');
-
-        head.append(
-            node('h2', p.mesa),
-            node('span', 'Pago', 'tag pronto')
-        );
-
         card.append(
-            head,
-            node('div', money(p.total), 'total'),
-            node(
-                'p',
-                p.cliente + ' · Pedido #' + p.id,
-                'info'
-            ),
-            node(
-                'small',
-                'Pedido realizado em ' +
-                new Date(p.created_at).toLocaleString('pt-BR')
-            )
+            node('h2', pg.mesa),
+            node('div', money(pg.valor), 'total'),
+            node('small', 'Pagamento #' + pg.id + ' · ' +
+                new Date(pg.criado_em).toLocaleString('pt-BR'))
         );
-
         root.append(card);
     }
 }
@@ -792,6 +786,10 @@ function renderHistory(root) {
 function openMesa(mesa) {
 
     selectedMesa = mesa;
+    selecionados = new Set(
+        openOrders().filter(p => p.mesa === mesa)
+            .flatMap(p => itensAbertos(p).map(i => i.id))
+    );
 
     $('overlay').hidden = false;
     $('modalNotice').textContent = '';
@@ -804,11 +802,28 @@ function openMesa(mesa) {
 function closeMesa() {
 
     selectedMesa = null;
+    selecionados.clear();
 
     $('overlay').hidden = true;
 
     document.body.style.overflow = '';
 }
+
+$('toggleAll').onclick = () => {
+    if (busy || !selectedMesa) return;
+
+    const list = openOrders().filter(p => p.mesa === selectedMesa);
+    const ids = list.flatMap(p => itensAbertos(p).map(i => i.id));
+    const todosMarcados = ids.length > 0 && ids.every(id => selecionados.has(id));
+
+    if (todosMarcados) {
+        ids.forEach(id => selecionados.delete(id));
+    } else {
+        ids.forEach(id => selecionados.add(id));
+    }
+
+    renderModal();
+};
 
 $('closeModal').onclick = closeMesa;
 
@@ -829,156 +844,88 @@ document.addEventListener('keydown', e => {
 /* DETALHES DOS PEDIDOS */
 
 function renderModal() {
-
-    const list = pedidos.filter(
-        p =>
-            p.mesa === selectedMesa &&
-            p.status_pagamento === 'aberto'
-    );
-
-    // Mostra também produtos cancelados integralmente
-    // durante o período da conta aberta.
-
-    const firstDate = list.length
-        ? Math.min(
-            ...list.map(p => new Date(p.created_at).getTime())
-        )
-        : Infinity;
-
-    const cancelled = pedidos.filter(
-        p =>
-            p.mesa === selectedMesa &&
-            p.status_pagamento === 'cancelado' &&
-            new Date(p.created_at).getTime() >= firstDate
-    );
-
-    $('mesaTitulo').textContent = selectedMesa;
-
+    const list = openOrders().filter(p => p.mesa === selectedMesa);
+    $('mesaTitulo').textContent = selectedMesa || '';
+    $('toggleAll').disabled = busy;
     const root = $('detalhes');
-
     root.replaceChildren();
-
-    for (const p of [...list, ...cancelled]) {
-
+    const validos = new Set(list.flatMap(p => itensAbertos(p).map(i => i.id)));
+    for (const id of selecionados) {
+        if (!validos.has(id)) selecionados.delete(id);
+    }
+    if (!list.length) {
+        root.append(node('div', 'Não há produtos pendentes de pagamento.', 'empty'));
+    }
+    for (const p of list) {
         const card = node('div', undefined, 'pedido');
-
-        const head = node(
-            'div',
-            undefined,
-            'pedido-header'
+        const head = node('div', undefined, 'pedido-header');
+        const identificacao = node('div');
+        identificacao.append(
+            node('strong', p.cliente || 'Cliente'),
+            node('p', 'Pedido #' + p.id, 'muted')
         );
 
-        head.append(
-            node('strong', p.cliente),
-            node(
-                'p',
-                'Pedido #' + p.id + ' · ' +
-                new Date(p.created_at).toLocaleTimeString(
-                    'pt-BR',
-                    { hour: '2-digit', minute: '2-digit' }
-                ),
-                'muted'
-            )
-        );
+        const idsCard = itensAbertos(p).map(i => i.id);
+        const cardMarcado = idsCard.length > 0 && idsCard.every(id => selecionados.has(id));
+        const botaoCard = node('button', cardMarcado ? 'Desmarcar' : 'Selecionar', 'select-card');
+        botaoCard.type = 'button';
+        botaoCard.disabled = busy;
+        botaoCard.onclick = () => {
+            idsCard.forEach(id => {
+                if (cardMarcado) selecionados.delete(id);
+                else selecionados.add(id);
+            });
+            renderModal();
+        };
 
+        head.append(identificacao, botaoCard);
         card.append(head);
-
-        for (const i of items(p)) {
-
-            const status = i.status || 'legado';
-
-            const item = node(
-                'div',
-                undefined,
-                'item ' + status
-            );
-
+        for (const i of itensAbertos(p)) {
+            const item = node('div', undefined, 'item');
             const line = node('div', undefined, 'flex');
-
-            line.append(
-                node('strong', i.nome, 'nome'),
-                node(
-                    'strong',
-                    money(status === 'cancelado' ? 0 : i.preco)
-                )
-            );
-
+            const label = node('label');
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            label.style.gap = '10px';
+            const check = document.createElement('input');
+            check.type = 'checkbox';
+            check.checked = selecionados.has(i.id);
+            check.disabled = busy;
+            check.onchange = () => {
+                if (check.checked) selecionados.add(i.id);
+                else selecionados.delete(i.id);
+                atualizarSelecao(list);
+            };
+            label.append(check, node('strong', i.nome || 'Produto', 'nome'));
+            line.append(label, node('strong', money(i.preco)));
             item.append(line);
-
-            const bottom = node(
-                'div',
-                undefined,
-                'item-bottom'
-            );
-
-            bottom.append(
-                node(
-                    'span',
-                    labels[status] || 'Pedido antigo',
-                    'tag ' + status
-                )
-            );
-
-            if (
-                p.status_pagamento === 'aberto' &&
-                i.id &&
-                ['pendente', 'em_preparo'].includes(status)
-            ) {
-
-                const btn = node(
-                    'button',
-                    'Cancelar produto',
-                    'danger'
-                );
-
+            const bottom = node('div', undefined, 'item-bottom');
+            bottom.append(node('span', labels[i.status] || 'Em atendimento', 'tag ' + i.status));
+            if (['pendente', 'em_preparo'].includes(i.status)) {
+                const btn = node('button', 'Cancelar produto', 'danger');
                 btn.disabled = busy;
-
                 btn.onclick = () => cancelar(p, i);
-
                 bottom.append(btn);
             }
-
             item.append(bottom);
-
-            if (status === 'cancelado') {
-
-                item.append(
-                    node(
-                        'small',
-                        'Cancelado por ' +
-                        (i.cancelado_por || '—') +
-                        (
-                            i.motivo_cancelamento
-                            ? ' · ' + i.motivo_cancelamento
-                            : ''
-                        )
-                    )
-                );
-            }
-
             card.append(item);
         }
-
         root.append(card);
     }
+    atualizarSelecao(list);
+}
 
-    if (!list.length) {
-
-        root.append(
-            node('div', 'Esta conta não está mais aberta.', 'empty')
-        );
-    }
-
-    $('modalTotal').textContent = money(total(list));
-
-    const ready = list.length > 0 &&
-        list.every(p => p.status_cozinha === 'pronto');
-
-    $('pay').disabled = busy || !ready;
-
-    $('paymentHint').textContent = ready
-        ? 'Confirme somente após receber o pagamento.'
-        : 'O fechamento será liberado quando todos os pedidos estiverem prontos.';
+function atualizarSelecao(list) {
+    const todos = list.flatMap(itensAbertos);
+    const valor = todos.filter(i => selecionados.has(i.id))
+        .reduce((s, i) => s + Number(i.preco || 0), 0);
+    const todosMarcados = todos.length > 0 && todos.every(i => selecionados.has(i.id));
+    $('toggleAll').textContent = todosMarcados ? 'Desmarcar todos' : 'Selecionar todos';
+    $('modalTotal').textContent = money(valor);
+    $('pay').disabled = busy || valor <= 0;
+    $('pay').textContent = 'Receber ' + money(valor);
+    $('paymentHint').textContent =
+        'Desmarque os produtos que não serão pagos agora. Saldo da mesa: ' + money(total(list));
 }
 
 /* CANCELAMENTO INDIVIDUAL */
@@ -1038,97 +985,30 @@ async function cancelar(p, i) {
 /* FECHAMENTO DE CONTA */
 
 $('pay').onclick = async () => {
-
-    if (busy || !selectedMesa) return;
-
+    if (busy || !selectedMesa || !selecionados.size) return;
     const mesa = selectedMesa;
-
-    const list = openOrders().filter(
-        p => p.mesa === mesa
-    );
-
-    if (!list.length) return;
-
-    if (!list.every(
-        p => p.status_cozinha === 'pronto'
-    )) {
-
-        notice('Ainda existem pedidos em preparo.', true);
-        return;
-    }
-
-    const valor = total(list);
-
-    if (!confirm(
-        'Confirma o recebimento de ' +
-        money(valor) +
-        ' referente à ' + mesa + '?'
-    )) return;
-
+    const list = openOrders().filter(p => p.mesa === mesa);
+    const escolhidos = list.flatMap(itensAbertos)
+        .filter(i => selecionados.has(i.id));
+    const valor = escolhidos.reduce((s, i) => s + Number(i.preco || 0), 0);
+    if (!escolhidos.length || valor <= 0) return;
+    if (!confirm('Confirmar recebimento de ' + money(valor) + ' da ' + mesa + '?')) return;
     busy = true;
-
     renderModal();
-
     try {
-
-        // Conferir alterações antes de solicitar pagamento.
-
-        const { data: atuais, error: checkError } =
-            await sb
-                .from('pedidos')
-                .select('id,total,status_cozinha')
-                .eq('mesa', mesa)
-                .eq('status_pagamento', 'aberto');
-
-        if (checkError) throw checkError;
-
-        const mesmosPedidos =
-            atuais.length === list.length &&
-            atuais.every(a =>
-                list.some(p =>
-                    p.id === a.id &&
-                    Number(p.total) === Number(a.total)
-                )
-            );
-
-        if (!mesmosPedidos ||
-            atuais.some(p => p.status_cozinha !== 'pronto')
-        ) {
-
-            throw new Error(
-                'A conta foi alterada. Confira os valores novamente.'
-            );
-        }
-
-        const { data, error } = await sb.rpc(
-            'fechar_conta',
-            {
-                p_pedidos_ids: list.map(p => p.id)
-            }
-        );
-
+        const { data, error } = await sb.rpc('receber_itens', {
+            p_itens_ids: escolhidos.map(i => i.id)
+        });
         if (error) throw error;
-
-        closeMesa();
-
-        notice(
-            mesa + ' · Pagamento registrado: ' +
-            money(data.total_pago)
-        );
-
-    } catch (e) {
-
-        notice(
-            e.message || 'Erro ao fechar conta.',
-            true
-        );
-
-    } finally {
-
-        busy = false;
-
+        selecionados.clear();
+        notice('Pagamento registrado: ' + money(data.total_pago));
         await load();
-
+        if (!openOrders().some(p => p.mesa === mesa)) closeMesa();
+    } catch (e) {
+        notice(e.message || 'Erro ao registrar pagamento.', true);
+    } finally {
+        busy = false;
+        await load();
         render();
     }
 };
@@ -1168,8 +1048,18 @@ async function load() {
 
         if (current !== version || !user) return;
 
+        const [{ data: itensPagos, error: erroItens },
+               { data: recebidos, error: erroPagamentos }] = await Promise.all([
+            sb.from('pagamento_itens').select('item_id').range(0, 9999),
+            sb.from('pagamentos').select('id,mesa,valor,criado_em')
+                .order('id', { ascending: true }).range(0, 9999)
+        ]);
+        if (erroItens) throw erroItens;
+        if (erroPagamentos) throw erroPagamentos;
+        if (current !== version || !user) return;
         pedidos = rows;
-
+        pagosIds = new Set((itensPagos || []).map(x => x.item_id));
+        pagamentos = recebidos || [];
         render();
 
     } catch (e) {
